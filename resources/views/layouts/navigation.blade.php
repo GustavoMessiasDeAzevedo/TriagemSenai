@@ -6,7 +6,6 @@
                 <a href="{{ route('dashboard') }}" class="flex items-center gap-3">
                     <img src="{{ asset('images/logo-senai.png') }}" alt="SENAI" class="h-9 w-auto object-contain">
                     <span class="font-bold text-gray-800 text-base tracking-wide border-l pl-3 border-gray-300">
-                        Portal IA
                     </span>
                 </a>
 
@@ -25,7 +24,7 @@
             </div>
 
             <!-- Menu de Usuário -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
+            <div class="flex items-center sm:ms-6">
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none transition">
