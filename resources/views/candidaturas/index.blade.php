@@ -1,4 +1,9 @@
 <x-app-layout>
+
+    <x-slot name="title">
+        Minhas Candidaturas
+    </x-slot>
+
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-white leading-tight">
             {{ __('Minhas Candidaturas') }}
@@ -24,7 +29,7 @@
 
             <!-- CARD PRINCIPAL COM A TIMELINE FIXA -->
             <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-100 space-y-6">
-                
+
                 <!-- CABEÇALHO DA CANDIDATURA -->
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-100">
                     <div>
@@ -75,7 +80,7 @@
 
                 <!-- GRID DA TIMELINE (4 ETAPAS) -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    
+
                     <!-- ETAPA 1: Teste e Currículo -->
                     <div class="p-4 border rounded-xl transition-all {{ $candidatura ? 'bg-green-50/70 border-green-200' : 'bg-blue-50/70 border-blue-300 ring-2 ring-blue-100' }}">
                         <div class="flex items-center gap-3">
@@ -108,7 +113,7 @@
                     @php
                         $entrevistaLiberada = $candidatura && in_array($candidatura->status, ['entrevista_agendada', 'finalizado']);
                     @endphp
-                    <div class="p-4 border rounded-xl transition-all {{ $entrevistaLiberada ? 'bg-blue-50/70 border-blue-300 cursor-pointer hover:shadow-md ring-2 ring-blue-100' : 'bg-gray-50 border-gray-200 opacity-60' }}" 
+                    <div class="p-4 border rounded-xl transition-all {{ $entrevistaLiberada ? 'bg-blue-50/70 border-blue-300 cursor-pointer hover:shadow-md ring-2 ring-blue-100' : 'bg-gray-50 border-gray-200 opacity-60' }}"
                          @if($entrevistaLiberada) onclick="openModal('modalEntrevista')" @endif>
                         <div class="flex items-center gap-3">
                             <span class="w-8 h-8 rounded-full {{ $entrevistaLiberada ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-600' }} flex items-center justify-center font-bold text-sm shadow-sm">3</span>
@@ -148,7 +153,7 @@
             <!-- ÁREA DO QUIZ (SÓ APARECE SE ELE AINDA NÃO SE CANDIDATOU) -->
             @if (!$candidatura)
                 <div x-data="candidaturaFlow()" class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-100">
-                    
+
                     <!-- ETAPA 0: TELA INICIAL DO QUIZ -->
                     <template x-if="etapa === 0">
                         <div class="text-center py-8 space-y-4">
@@ -176,18 +181,18 @@
                             <div class="space-y-3">
                                 <template x-for="(opcao, index) in questaoList[etapa - 1].opcoes" :key="index">
                                     <label class="flex items-center p-4 border rounded-xl cursor-pointer hover:bg-gray-50 transition-colors">
-                                        <input type="radio" 
-                                               :name="`questao_${questaoList[etapa - 1].id}`" 
-                                               :value="opcao" 
-                                               x-model="respostas[questaoList[etapa - 1].id]" 
+                                        <input type="radio"
+                                               :name="`questao_${questaoList[etapa - 1].id}`"
+                                               :value="opcao"
+                                               x-model="respostas[questaoList[etapa - 1].id]"
                                                class="text-blue-600 focus:ring-blue-500">
                                         <span class="ml-3 text-sm text-gray-700" x-text="opcao"></span>
                                     </label>
                                 </template>
                             </div>
 
-                            <button @click="proximaEtapa()" 
-                                    :disabled="!respostas[questaoList[etapa - 1].id]" 
+                            <button @click="proximaEtapa()"
+                                    :disabled="!respostas[questaoList[etapa - 1].id]"
                                     class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl disabled:opacity-50 transition-colors">
                                 <span x-text="etapa === questaoList.length ? 'Finalizar Teste e Anexar Currículo' : 'Próxima Questão'"></span>
                             </button>
@@ -195,7 +200,7 @@
                     </template>
 
                     <!-- MODAL DE UPLOAD DO CURRÍCULO -->
-                    <div x-show="abrirModalCurriculo" 
+                    <div x-show="abrirModalCurriculo"
                          x-cloak
                          class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                         <div class="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
@@ -233,18 +238,18 @@
                             📅 Entrevista Agendada
                         </h3>
                         <p class="text-xs text-gray-500 mb-4">Informações sobre o seu agendamento:</p>
-                        
+
                         <div class="space-y-3 bg-blue-50 p-4 rounded-xl text-sm border border-blue-100 text-blue-950">
                             <p>
-                                <strong>Data/Hora:</strong> 
+                                <strong>Data/Hora:</strong>
                                 {{ $candidatura->data_entrevista ? \Carbon\Carbon::parse($candidatura->data_entrevista)->format('d/m/Y \à\s H:i') : 'A definir pelo recrutador' }}
                             </p>
                             <p>
-                                    <strong>Local/Sala:</strong> 
+                                    <strong>Local/Sala:</strong>
                                     {{ !empty($candidatura->local_entrevista) ? $candidatura->local_entrevista : 'A definir pelo recrutador' }}
                             </p>
                         </div>
-                        
+
                         <button onclick="closeModal('modalEntrevista')" class="mt-5 w-full py-2.5 bg-gray-900 text-white rounded-xl font-bold hover:bg-gray-800 transition-colors">
                             Fechar
                         </button>
@@ -258,11 +263,11 @@
                             📝 Parecer Final do Recrutador
                         </h3>
                         <p class="text-xs text-gray-500 mb-4">Feedback conclusivo sobre o seu processo seletivo:</p>
-                        
+
                         <div class="p-4 bg-purple-50 rounded-xl text-purple-900 text-sm border border-purple-100 leading-relaxed whitespace-pre-line">
                             {{ $candidatura->feedback_recrutador ?? 'Nenhum parecer cadastrado até o momento.' }}
                         </div>
-                        
+
                         <button onclick="closeModal('modalFeedback')" class="mt-5 w-full py-2.5 bg-gray-900 text-white rounded-xl font-bold hover:bg-gray-800 transition-colors">
                             Fechar
                         </button>

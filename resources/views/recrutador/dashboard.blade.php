@@ -1,4 +1,9 @@
 <x-app-layout>
+
+    <x-slot name="title">
+        Minhas Candidaturas
+    </x-slot>
+
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-white leading-tight">
             {{ __('Painel do Recrutador — Candidaturas') }}
@@ -99,7 +104,7 @@
                                             </a>
                                         @endif
 
-                                        <button @click="candidaturaSelecionada = {local_entrevista: '', ...{{ json_encode($item) }}}; modalAberto = true" 
+                                        <button @click="candidaturaSelecionada = {local_entrevista: '', ...{{ json_encode($item) }}}; modalAberto = true"
                                                 class="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg text-xs transition-colors shadow-sm">
                                             Avaliar / Agendar
                                         </button>
@@ -125,13 +130,13 @@
             </div>
 
             <!-- MODAL DE ANÁLISE / AGENDAMENTO / FEEDBACK DO RECRUTADOR -->
-            <div x-show="modalAberto" 
-                 x-cloak 
+            <div x-show="modalAberto"
+                 x-cloak
                  class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                
-                <div @click.away="modalAberto = false" 
+
+                <div @click.away="modalAberto = false"
                      class="bg-white rounded-2xl p-6 max-w-2xl w-full shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
-                    
+
                     <!-- CABEÇALHO DO MODAL -->
                     <div class="flex items-center justify-between border-b pb-4">
                         <div>
@@ -171,9 +176,9 @@
                                 <!-- DATA E HORA DA ENTREVISTA -->
                                 <div>
                                     <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Data/Hora da Entrevista</label>
-                                    <input type="datetime-local" 
-                                           name="data_entrevista" 
-                                           x-model="candidaturaSelecionada.data_entrevista" 
+                                    <input type="datetime-local"
+                                           name="data_entrevista"
+                                           x-model="candidaturaSelecionada.data_entrevista"
                                            class="w-full rounded-xl border-gray-300 text-sm focus:ring-purple-500">
                                 </div>
                             </div>
@@ -181,12 +186,12 @@
                             <!-- LOCAL / SALA DA ENTREVISTA -->
                             <div>
                                 <label for="local_entrevista_input" class="block text-xs font-bold text-gray-700 uppercase mb-2">Local / Sala da Entrevista</label>
-                                <input type="text" 
+                                <input type="text"
                                     id="local_entrevista_input"
-                                    name="local_entrevista" 
+                                    name="local_entrevista"
                                     x-model="candidaturaSelecionada.local_entrevista"
                                     :value="candidaturaSelecionada ? candidaturaSelecionada.local_entrevista : ''"
-                                    placeholder="Ex: Sala de Reuniões 02 / Presencial no Bloco 01" 
+                                    placeholder="Ex: Sala de Reuniões 02 / Presencial no Bloco 01"
                                     class="w-full rounded-xl border-gray-300 text-sm focus:ring-purple-500">
                             </div>
 
@@ -194,11 +199,11 @@
                             <div>
                                 <label for="feedback_recrutador_input" class="block text-xs font-bold text-gray-700 uppercase mb-2">Feedback / Recado Visível para o Aluno</label>
                                 <textarea id="feedback_recrutador_input"
-                                        name="feedback_recrutador" 
-                                        rows="3" 
-                                        x-model="candidaturaSelecionada.feedback_recrutador" 
+                                        name="feedback_recrutador"
+                                        rows="3"
+                                        x-model="candidaturaSelecionada.feedback_recrutador"
                                         :value="candidaturaSelecionada ? candidaturaSelecionada.feedback_recrutador : ''"
-                                        placeholder="Escreva uma mensagem ou parecer conclusivo que o aluno verá no modal de feedback..." 
+                                        placeholder="Escreva uma mensagem ou parecer conclusivo que o aluno verá no modal de feedback..."
                                         class="w-full rounded-xl border-gray-300 text-sm focus:ring-purple-500"></textarea>
                             </div>
 
@@ -215,7 +220,7 @@
                     </template>
 
                 </div>
-            </div> 
+            </div>
 
         </div>
     </div>
