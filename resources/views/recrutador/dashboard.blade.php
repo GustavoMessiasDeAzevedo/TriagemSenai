@@ -38,10 +38,14 @@
 
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Área de Interesse</label>
-                        <select name="area" class="w-full rounded-xl border-gray-300 text-sm focus:ring-purple-500 focus:border-purple-500">
+                        <select name="area" class="w-full rounded-xl border-slate-200 text-sm text-slate-700 focus:ring-purple-500 focus:border-purple-500">
                             <option value="">Todas as Áreas</option>
-                            <option value="Eletroeletrônica Geral" {{ request('area') == 'Eletroeletrônica Geral' ? 'selected' : '' }}>Eletroeletrônica Geral</option>
-                            <option value="Eletroeletrônica SENAI" {{ request('area') == 'Eletroeletrônica SENAI' ? 'selected' : '' }}>Eletroeletrônica SENAI</option>
+                            
+                            @foreach($vagas as $vaga)
+                                <option value="{{ $vaga->titulo }}" {{ request('area') == $vaga->titulo ? 'selected' : '' }}>
+                                    {{ $vaga->titulo }}
+                                </option>
+                            @endforeach
                         </select>
                     </div>
 
@@ -86,7 +90,7 @@
                                         </span>
                                     </td>
                                     <td class="py-4 px-6 capitalize text-gray-700 font-medium">
-                                        {{ $item->nivel_sugerido_ia }}
+                                        {{ $item->vaga->titulo ?? $item->area_interesse ?? 'Vaga Não Informada' }}
                                     </td>
                                     <td class="py-4 px-6">
                                         @if ($item->status == 'aguardando_retorno')
