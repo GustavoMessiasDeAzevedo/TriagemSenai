@@ -62,79 +62,82 @@
 
             <!-- TABELA DE CANDIDATOS -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse text-sm">
-                        <thead>
-                            <tr class="bg-gray-50 border-b border-gray-100 text-gray-500 text-xs uppercase tracking-wider">
-                                <th class="py-4 px-6">Candidato</th>
-                                <th class="py-4 px-6">Área</th>
-                                <th class="py-4 px-6">Nota Match IA</th>
-                                <th class="py-4 px-6">Nível Sugerido</th>
-                                <th class="py-4 px-6">Status</th>
-                                <th class="py-4 px-6 text-right">Ações</th>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-sm">
+                    <thead>
+                        <tr class="bg-gray-50 border-b border-gray-100 text-gray-500 text-xs uppercase tracking-wider">
+                            <th class="py-4 px-6">Candidato</th>
+                            <th class="py-4 px-6">Área</th>
+                            <th class="py-4 px-6">Nota Match IA</th>
+                            <th class="py-4 px-6">Nível Sugerido</th>
+                            <th class="py-4 px-6">Status</th>
+                            <th class="py-4 px-6 text-right">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        @forelse ($candidaturas as $item)
+                            <tr class="hover:bg-gray-50/50 transition-colors">
+                                <td class="py-4 px-6 font-semibold text-gray-800 whitespace-nowrap">
+                                    {{ $item->user->name ?? 'Usuário Removido' }}
+                                    <span class="block text-xs font-normal text-gray-400">{{ $item->user->email ?? '' }}</span>
+                                </td>
+        
+                                {{-- ÁREA (Exibe a Vaga Correspondente) --}}
+                                <td class="py-4 px-6 text-gray-600 max-w-xs truncate" title="{{ $vagas->firstWhere('nivel', $item->nivel_sugerido_ia)->titulo ?? $item->area_interesse ?? '' }}">
+                                    @php
+                                        $vagaCorrespondente = $vagas->firstWhere('nivel', $item->nivel_sugerido_ia);
+                                    @endphp
+                                    {{ $vagaCorrespondente->titulo ?? $item->area_interesse ?? 'Vaga Não Definida' }}
+                                </td>
+        
+                                {{-- NOTA MATCH --}}
+                                <td class="py-4 px-6 whitespace-nowrap">
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-bold {{ $item->nota_match >= 80 ? 'bg-green-100 text-green-700' : ($item->nota_match >= 50 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700') }}">
+                                        {{ $item->nota_match }}% Match
+                                    </span>
+                                </td>
+        
+                                {{-- NÍVEL SUGERIDO --}}
+                                <td class="py-4 px-6 capitalize text-gray-700 font-medium whitespace-nowrap">
+                                    {{ $item->nivel_sugerido_ia ?? 'Não avaliado' }}
+                                </td>
+        
+                                {{-- STATUS --}}
+                                <td class="py-4 px-6 whitespace-nowrap">
+                                    @if ($item->status == 'aguardando_retorno')
+                                        <span class="px-2.5 py-1 bg-amber-100 text-amber-700 text-xs font-bold rounded-full">Análise Pendente</span>
+                                    @elseif ($item->status == 'entrevista_agendada')
+                                        <span class="px-2.5 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-full">Entrevista Agendada</span>
+                                    @elseif ($item->status == 'finalizado')
+                                        <span class="px-2.5 py-1 bg-purple-100 text-purple-700 text-xs font-bold rounded-full">Finalizado</span>
+                                    @endif
+                                </td>
+        
+                                {{-- AÇÕES --}}
+                                <td class="py-4 px-6 text-right space-x-2 whitespace-nowrap">
+                                    @if($item->caminho_pdf)
+                                        <a href="{{ asset('storage/' . $item->caminho_pdf) }}" target="_blank" class="inline-flex items-center text-xs font-bold text-gray-500 hover:text-gray-700">
+                                            📄 PDF
+                                        </a>
+                                    @endif
+        
+                                    <button @click="candidaturaSelecionada = {local_entrevista: '', ...{{ json_encode($item) }}}; modalAberto = true"
+                                            class="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg text-xs transition-colors shadow-sm">
+                                        Avaliar / Agendar
+                                    </button>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100">
-                            @forelse ($candidaturas as $item)
-                                <tr class="hover:bg-gray-50/50 transition-colors">
-                                    <td class="py-4 px-6 font-semibold text-gray-800">
-                                        {{ $item->user->name ?? 'Usuário Removido' }}
-                                        <span class="block text-xs font-normal text-gray-400">{{ $item->user->email ?? '' }}</span>
-                                    </td>
-                                    <td class="py-4 px-6 text-gray-600">
-                                        {{ $item->area_interesse }}
-                                    </td>
-                                    <td class="py-4 px-6">
-                                        <span class="px-2.5 py-1 rounded-full text-xs font-bold {{ $item->nota_match >= 80 ? 'bg-green-100 text-green-700' : ($item->nota_match >= 50 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700') }}">
-                                            {{ $item->nota_match }}% Match
-                                        </span>
-                                    </td>
-                                    <td class="py-4 px-6 capitalize text-gray-700 font-medium">
-                                        @php
-                                            $vagaCorrespondente = $vagas->firstWhere('nivel', $item->nivel_sugerido_ia);
-                                        @endphp
-                                        {{ $vagaCorrespondente->titulo ?? $item->area_interesse ?? 'Vaga Não Definida' }}
-                                    </td>
-                                    <td class="py-4 px-6">
-                                        @if ($item->status == 'aguardando_retorno')
-                                            <span class="px-2.5 py-1 bg-amber-100 text-amber-700 text-xs font-bold rounded-full">Análise Pendente</span>
-                                        @elseif ($item->status == 'entrevista_agendada')
-                                            <span class="px-2.5 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-full">Entrevista Agendada</span>
-                                        @elseif ($item->status == 'finalizado')
-                                            <span class="px-2.5 py-1 bg-purple-100 text-purple-700 text-xs font-bold rounded-full">Finalizado</span>
-                                        @endif
-                                    </td>
-                                    <td class="py-4 px-6 text-right space-x-2">
-                                        @if($item->caminho_pdf)
-                                            <a href="{{ asset('storage/' . $item->caminho_pdf) }}" target="_blank" class="inline-flex items-center text-xs font-bold text-gray-500 hover:text-gray-700">
-                                                📄 PDF
-                                            </a>
-                                        @endif
-
-                                        <button @click="candidaturaSelecionada = {local_entrevista: '', ...{{ json_encode($item) }}}; modalAberto = true"
-                                                class="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg text-xs transition-colors shadow-sm">
-                                            Avaliar / Agendar
-                                        </button>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="6" class="py-8 text-center text-gray-400">
-                                        Nenhuma candidatura encontrada com os filtros aplicados.
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- PAGINAÇÃO -->
-                @if($candidaturas->hasPages())
-                    <div class="p-4 border-t border-gray-100">
-                        {{ $candidaturas->links() }}
-                    </div>
-                @endif
+                        @empty
+                            <tr>
+                                <td colspan="6" class="py-8 text-center text-gray-400">
+                                    Nenhuma candidatura encontrada com os filtros aplicados.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
+        </div>
 
             <!-- MODAL DE ANÁLISE / AGENDAMENTO / FEEDBACK DO RECRUTADOR -->
             <div x-show="modalAberto"
