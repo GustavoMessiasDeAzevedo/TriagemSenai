@@ -5,27 +5,24 @@ namespace App\Http\Controllers;
 use App\Models\Candidatura;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Smalot\PdfParser\Parser;
 
 class CandidaturaController extends Controller
 {
-    /**
-     * Exibe a tela de candidatura do candidato.
-     */
+
     public function index()
     {
-        // Corrigida a consulta para não passar parâmetro excedente
         $candidaturas = Candidatura::where('user_id', Auth::id())
             ->latest()
             ->get();
 
         return view('candidaturas.index', compact('candidaturas'));
     }
-    /**
-     * Processa o envio do teste técnico e do currículo em PDF.
-     */
-   public function store(Request $request)
+
+
+    public function store(Request $request)
     {
-        // 1. Trata a string JSON do respostas para virar array ANTES de validar
+        // 1. Trata a string JSON das respostas
         if ($request->has('respostas') && is_string($request->input('respostas'))) {
             $request->merge([
                 'respostas_questionario' => json_decode($request->input('respostas'), true) ?? []
@@ -34,60 +31,98 @@ class CandidaturaController extends Controller
 
         // 2. Validação dos campos
         $request->validate([
-            'curriculo' => 'required|mimes:pdf|max:10240', // PDF até 10MB
-            'respostas_questionario' => 'required|array',
+            'curriculo' => 'required|mimes:pdf|max:10240',
+            'respostas_questionario' => 'nullable|array',
         ]);
 
-        // 3. Upload do arquivo PDF do Currículo
+        // 3. Upload do arquivo PDF do Currículo e Leitura de Texto
         $caminhoPdf = null;
+        $textoCurriculo = '';
+
         if ($request->hasFile('curriculo')) {
             $caminhoPdf = $request->file('curriculo')->store('curriculos', 'public');
-        }
+            $caminhoAbsoluto = storage_path('app/public/' . $caminhoPdf);
 
-        // 4. Processamento das respostas do Questionário
-        $respostas = $request->input('respostas_questionario', []);
-
-        // Gabarito oficial das 6 questões
-        $gabarito = [
-            1 => 'B) 20 A | Disjuntor de 25 A',
-            2 => 'D) Condutor Neutro: Azul Claro | Queda de Tensão: 10 V',
-            3 => 'B) Sobre o resistor R2',
-            4 => 'A) Pd = 4,0 W — O dissipador é insuficiente e haverá colapso por sobretemperatura.',
-            5 => 'B) MTBF = 105 min | Disponibilidade = 87,5%',
-            6 => 'B) Redução da corrente total no circuito de alimentação, aliviando condutores e transformadores.',
-        ];
-
-        $acertos = 0;
-        $totalQuestoes = count($gabarito);
-
-        foreach ($gabarito as $idQuestao => $respostaCorreta) {
-            if (isset($respostas[$idQuestao]) && $respostas[$idQuestao] === $respostaCorreta) {
-                $acertos++;
+            try {
+                if (file_exists($caminhoAbsoluto)) {
+                    $parser = new Parser();
+                    $pdf = $parser->parseFile($caminhoAbsoluto);
+                    $textoCurriculo = mb_strtolower($pdf->getText());
+                }
+            } catch (\Exception $e) {
+                \Log::error('Erro ao ler PDF: ' . $e->getMessage());
             }
         }
 
-        // Cálculo da Nota de Match (0 a 100%)
-        $notaMatch = round(($acertos / $totalQuestoes) * 100);
+        // 4. Avaliação do Questionário Técnico (Peso: 50% da nota)
+        $respostas = $request->input('respostas_questionario', []);
 
-        // 5. Definição do Nível Sugerido e Parecer do "Engenheiro Mentor" (IA)
-        if ($notaMatch >= 80) {
-            $nivelSugerido = 'avancado';
-            $parecerIa = "Excelente desempenho técnico ({$acertos}/{$totalQuestoes} acertos - {$notaMatch}%). O candidato demonstrou domínio avançado em dimensionamento elétrico, análise de semicondutores, indicadores de manutenção (MTBF) e qualidade de energia. Recomendado para posições de Analista ou Técnico Especialista.";
-        } elseif ($notaMatch >= 50) {
-            $nivelSugerido = 'tecnico';
-            $parecerIa = "Desempenho técnico mediano ({$acertos}/{$totalQuestoes} acertos - {$notaMatch}%). Possui boa base conceitual em instalações e circuitos, porém apresentou incertezas em tópicos avançados de eletrônica/manutenção. Recomendado para posições Nível Técnico Pleno/Júnior.";
-        } else {
-            $nivelSugerido = 'basico';
-            $parecerIa = "Desempenho técnico inicial ({$acertos}/{$totalQuestoes} acertos - {$notaMatch}%). Apresenta conhecimentos fundamentais, sendo necessário treinamento suplementar nas normas (NBR 5410) e práticas de bancada. Recomendado para posições de Auxiliar / Aprendiz.";
+        $gabaritoLetras = [
+            1 => 'B',
+            2 => 'D',
+            3 => 'B',
+            4 => 'A',
+            5 => 'B',
+            6 => 'B',
+        ];
+
+        $acertos = 0;
+        $totalQuestoes = count($gabaritoLetras);
+
+        foreach ($gabaritoLetras as $idQuestao => $letraCorreta) {
+            if (isset($respostas[$idQuestao])) {
+                $respostaEnviada = strtoupper(trim($respostas[$idQuestao]));
+                if (str_starts_with($respostaEnviada, $letraCorreta)) {
+                    $acertos++;
+                }
+            }
         }
 
-        // 6. Tratamento da Área de Interesse
-        $areaInteresse = $request->input('area_interesse');
-        if (empty($areaInteresse)) {
-            $areaInteresse = 'Eletroeletrônica Geral';
+        $notaQuestionario = ($totalQuestoes > 0) ? ($acertos / $totalQuestoes) * 100 : 0;
+
+        // 5. Avaliação Dinâmica do Currículo por Vaga (Peso: 50% da nota)
+        $vagaId = $request->input('vaga_id');
+        $vaga = \App\Models\Vaga::find($vagaId);
+
+        $notaCurriculo = 0;
+
+        if ($vaga && !empty($textoCurriculo)) {
+            $requisitosVaga = mb_strtolower($vaga->descricao_requisitos ?? '');
+            
+            preg_match_all('/\b[a-z0-9\-]{3,}\b/u', $requisitosVaga, $matches);
+            $palavrasRequisitos = array_unique($matches[0]);
+
+            $encontradas = 0;
+            foreach ($palavrasRequisitos as $palavra) {
+                if (str_contains($textoCurriculo, $palavra)) {
+                    $encontradas++;
+                }
+            }
+
+            $totalTermos = max(1, count($palavrasRequisitos));
+            $notaCurriculo = min(100, round(($encontradas / $totalTermos) * 100));
+        } else {
+            $notaCurriculo = $notaQuestionario;
+        }
+
+
+        $notaMatch = round(($notaQuestionario * 0.5) + ($notaCurriculo * 0.5));
+
+        // 6. Definição do Nível Sugerido e Parecer da IA
+        if ($notaMatch >= 80) {
+            $nivelSugerido = 'avancado';
+            $parecerIa = "Excelente alinhamento técnico ({$notaMatch}% de match). O candidato obteve {$acertos}/{$totalQuestoes} acertos no teste e o currículo apresentou forte domínio nas tecnologias exigidas.";
+        } elseif ($notaMatch >= 50) {
+            $nivelSugerido = 'tecnico';
+            $parecerIa = "Desempenho mediano ({$notaMatch}% de match). Apresenta base conceitual sólida, com {$acertos}/{$totalQuestoes} acertos no teste, atendo parcialmente aos requisitos no currículo.";
+        } else {
+            $nivelSugerido = 'basico';
+            $parecerIa = "Desempenho inicial ({$notaMatch}% de match). O candidato obteve {$acertos}/{$totalQuestoes} acertos e pouca correspondência com as palavras-chave exigidas na vaga.";
         }
 
         // 7. Salvar a Candidatura
+        $areaInteresse = $request->input('area_interesse', 'Automação Industrial / Eletroeletrônica');
+
         Candidatura::create([
             'user_id' => Auth::id(),
             'area_interesse' => $areaInteresse,
