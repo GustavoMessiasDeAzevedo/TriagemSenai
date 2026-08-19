@@ -5,40 +5,38 @@
     </x-slot>
 
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-white leading-tight">
-            {{ __('Minhas Candidaturas') }}
+        <h2 class="font-semibold text-xl text-white leading-tight flex items-center gap-2">
+            <span>📋</span> {{ __('Minhas Candidaturas') }}
         </h2>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+    <div class="py-10 bg-slate-50 min-h-screen">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
 
-            <!-- ALERTA DE SUCESSO -->
             @if (session('sucesso'))
-                <div class="p-4 bg-green-100 border border-green-300 text-green-800 rounded-2xl shadow-sm flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <span class="text-xl">✅</span>
-                        <p class="text-sm font-medium">{{ session('sucesso') }}</p>
+                <div class="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl shadow-sm flex items-center justify-between transition-all duration-300">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl">✅</span>
+                        <p class="text-sm font-semibold">{{ session('sucesso') }}</p>
                     </div>
                 </div>
             @endif
 
             @php
-                $candidatura = $candidaturas->sortByDesc('updated_at')->first();// Pega a candidatura cadastrada do usuário
+                $candidatura = $candidaturas->sortByDesc('updated_at')->first();
             @endphp
 
-            <!-- CARD PRINCIPAL COM A TIMELINE FIXA -->
-            <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-100 space-y-6">
+            <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-200/80 space-y-8 transition-all hover:shadow-md">
 
-                <!-- CABEÇALHO DA CANDIDATURA -->
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-100">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
                     <div>
                         <div class="flex items-center gap-2">
-                            <span class="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-bold rounded-full uppercase tracking-wider">
+                            <span class="px-3.5 py-1.5 bg-purple-50 text-purple-700 border border-purple-200/60 text-xs font-bold rounded-full uppercase tracking-wider shadow-2xs">
                                 {{ $candidatura->area_interesse ?? 'Eletroeletrônica SENAI' }}
                             </span>
                         </div>
-                        <p class="text-xs text-gray-400 mt-2">
+                        <p class="text-xs text-slate-400 mt-2.5 flex items-center gap-1 font-medium">
+                            <span>🕒</span>
                             @if($candidatura)
                                 Enviado em {{ \Carbon\Carbon::parse($candidatura->created_at)->format('d/m/Y \à\s H:i') }}
                             @else
@@ -47,25 +45,24 @@
                         </p>
                     </div>
 
-                    <!-- BADGE DE STATUS GERAL -->
                     <div>
                         @if (!$candidatura)
-                            <span class="px-3 py-1 bg-gray-100 text-gray-700 text-xs font-bold rounded-full flex items-center gap-1.5 w-fit">
-                                <span class="w-2 h-2 rounded-full bg-gray-400"></span>
+                            <span class="px-3.5 py-1.5 bg-slate-100 text-slate-700 text-xs font-bold rounded-full flex items-center gap-2 w-fit border border-slate-200/60">
+                                <span class="w-2 h-2 rounded-full bg-slate-400"></span>
                                 Aguardando Teste/Envio
                             </span>
                         @elseif ($candidatura->status == 'aguardando_retorno')
-                            <span class="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-bold rounded-full flex items-center gap-1.5 w-fit">
+                            <span class="px-3.5 py-1.5 bg-amber-50 text-amber-800 text-xs font-bold rounded-full flex items-center gap-2 w-fit border border-amber-200/80 shadow-2xs">
                                 <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
                                 Analisando currículo e teste
                             </span>
                         @elseif ($candidatura->status == 'entrevista_agendada')
-                            <span class="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-full flex items-center gap-1.5 w-fit">
+                            <span class="px-3.5 py-1.5 bg-blue-50 text-blue-700 text-xs font-bold rounded-full flex items-center gap-2 w-fit border border-blue-200/80 shadow-2xs">
                                 <span class="w-2 h-2 rounded-full bg-blue-500"></span>
                                 Entrevista Agendada
                             </span>
                         @elseif ($candidatura->status == 'finalizado')
-                            <span class="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-bold rounded-full flex items-center gap-1.5 w-fit">
+                            <span class="px-3.5 py-1.5 bg-purple-50 text-purple-700 text-xs font-bold rounded-full flex items-center gap-2 w-fit border border-purple-200/80 shadow-2xs">
                                 <span class="w-2 h-2 rounded-full bg-purple-500"></span>
                                 Processo Finalizado
                             </span>
@@ -73,55 +70,52 @@
                     </div>
                 </div>
 
-                <!-- TÍTULO DA SEÇÃO -->
-                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider">
-                    Etapas do Processo
-                </h3>
+                <div class="flex items-center gap-2">
+                    <h3 class="text-xs font-extrabold text-slate-400 uppercase tracking-wider">
+                        Etapas do Processo
+                    </h3>
+                </div>
 
-                <!-- GRID DA TIMELINE (4 ETAPAS) -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
-                    <!-- ETAPA 1: Teste e Currículo -->
-                    <div class="p-4 border rounded-xl transition-all {{ $candidatura ? 'bg-green-50/70 border-green-200' : 'bg-blue-50/70 border-blue-300 ring-2 ring-blue-100' }}">
-                        <div class="flex items-center gap-3">
-                            <span class="w-8 h-8 rounded-full {{ $candidatura ? 'bg-green-500' : 'bg-blue-600' }} text-white flex items-center justify-center font-bold text-sm shadow-sm">
+                    <div class="p-4 border rounded-2xl transition-all duration-200 {{ $candidatura ? 'bg-emerald-50/50 border-emerald-200/80 shadow-2xs' : 'bg-blue-50/60 border-blue-300 ring-2 ring-blue-100 shadow-xs' }}">
+                        <div class="flex items-center gap-3.5">
+                            <span class="w-9 h-9 rounded-xl {{ $candidatura ? 'bg-emerald-500' : 'bg-blue-600' }} text-white flex items-center justify-center font-bold text-sm shadow-sm transition-transform hover:scale-105">
                                 {{ $candidatura ? '✓' : '1' }}
                             </span>
                             <div>
-                                <h4 class="font-bold text-gray-800 text-sm">1. Teste & Envio</h4>
-                                <p class="text-xs {{ $candidatura ? 'text-green-600' : 'text-blue-600' }} font-medium">
+                                <h4 class="font-bold text-slate-800 text-sm">1. Teste & Envio</h4>
+                                <p class="text-xs {{ $candidatura ? 'text-emerald-700' : 'text-blue-700' }} font-semibold mt-0.5">
                                     {{ $candidatura ? 'Concluído' : 'Em andamento' }}
                                 </p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- ETAPA 2: Análise Técnica -->
-                    <div class="p-4 border rounded-xl transition-all {{ $candidatura && $candidatura->status == 'aguardando_retorno' ? 'bg-amber-50/70 border-amber-300 ring-2 ring-amber-100' : 'bg-gray-50 border-gray-200 opacity-60' }}">
-                        <div class="flex items-center gap-3">
-                            <span class="w-8 h-8 rounded-full {{ $candidatura && $candidatura->status == 'aguardando_retorno' ? 'bg-amber-400 text-white' : 'bg-gray-300 text-gray-600' }} flex items-center justify-center font-bold text-sm shadow-sm">2</span>
+                    <div class="p-4 border rounded-2xl transition-all duration-200 {{ $candidatura && $candidatura->status == 'aguardando_retorno' ? 'bg-amber-50/70 border-amber-300 ring-2 ring-amber-100 shadow-xs' : 'bg-slate-50/80 border-slate-200/80 opacity-70' }}">
+                        <div class="flex items-center gap-3.5">
+                            <span class="w-9 h-9 rounded-xl {{ $candidatura && $candidatura->status == 'aguardando_retorno' ? 'bg-amber-500 text-white' : 'bg-slate-200 text-slate-600' }} flex items-center justify-center font-bold text-sm shadow-sm">2</span>
                             <div>
-                                <h4 class="font-bold text-gray-800 text-sm">2. Análise Técnica</h4>
-                                <p class="text-xs text-amber-600 font-medium">
+                                <h4 class="font-bold text-slate-800 text-sm">2. Análise Técnica</h4>
+                                <p class="text-xs text-amber-700 font-semibold mt-0.5">
                                     @if(!$candidatura) Aguardando etapa 1 @elseif($candidatura->status == 'aguardando_retorno') Em andamento... @else Concluído @endif
                                 </p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- ETAPA 3: Entrevista -->
                     @php
                         $entrevistaLiberada = $candidatura && in_array($candidatura->status, ['entrevista_agendada', 'finalizado']);
                     @endphp
-                    <div class="p-4 border rounded-xl transition-all {{ $entrevistaLiberada ? 'bg-blue-50/70 border-blue-300 cursor-pointer hover:shadow-md ring-2 ring-blue-100' : 'bg-gray-50 border-gray-200 opacity-60' }}"
+                    <div class="p-4 border rounded-2xl transition-all duration-200 {{ $entrevistaLiberada ? 'bg-blue-50/70 border-blue-300 cursor-pointer hover:shadow-md hover:-translate-y-0.5 ring-2 ring-blue-100' : 'bg-slate-50/80 border-slate-200/80 opacity-70' }}"
                          @if($entrevistaLiberada) onclick="openModal('modalEntrevista')" @endif>
-                        <div class="flex items-center gap-3">
-                            <span class="w-8 h-8 rounded-full {{ $entrevistaLiberada ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-600' }} flex items-center justify-center font-bold text-sm shadow-sm">3</span>
+                        <div class="flex items-center gap-3.5">
+                            <span class="w-9 h-9 rounded-xl {{ $entrevistaLiberada ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-600' }} flex items-center justify-center font-bold text-sm shadow-sm">3</span>
                             <div>
-                                <h4 class="font-bold text-gray-800 text-sm">3. Entrevista</h4>
-                                <p class="text-xs text-blue-600 font-medium">
+                                <h4 class="font-bold text-slate-800 text-sm">3. Entrevista</h4>
+                                <p class="text-xs text-blue-700 font-semibold mt-0.5">
                                     @if($candidatura && $candidatura->status == 'entrevista_agendada')
-                                        <span class="underline font-semibold">Ver Agendamento 📅</span>
+                                        <span class="underline hover:text-blue-800 transition-colors">Ver Agendamento 📅</span>
                                     @elseif($candidatura && $candidatura->status == 'finalizado')
                                         Realizada
                                     @else
@@ -132,14 +126,13 @@
                         </div>
                     </div>
 
-                    <!-- ETAPA 4: Feedback -->
-                    <div class="p-4 border rounded-xl transition-all {{ $candidatura && $candidatura->status == 'finalizado' ? 'bg-purple-50/70 border-purple-300 cursor-pointer hover:shadow-md ring-2 ring-purple-100' : 'bg-gray-50 border-gray-200 opacity-60' }}"
+                    <div class="p-4 border rounded-2xl transition-all duration-200 {{ $candidatura && $candidatura->status == 'finalizado' ? 'bg-purple-50/70 border-purple-300 cursor-pointer hover:shadow-md hover:-translate-y-0.5 ring-2 ring-purple-100' : 'bg-slate-50/80 border-slate-200/80 opacity-70' }}"
                          @if($candidatura && $candidatura->status == 'finalizado') onclick="openModal('modalFeedback')" @endif>
-                        <div class="flex items-center gap-3">
-                            <span class="w-8 h-8 rounded-full {{ $candidatura && $candidatura->status == 'finalizado' ? 'bg-purple-500 text-white' : 'bg-gray-300 text-gray-600' }} flex items-center justify-center font-bold text-sm shadow-sm">4</span>
+                        <div class="flex items-center gap-3.5">
+                            <span class="w-9 h-9 rounded-xl {{ $candidatura && $candidatura->status == 'finalizado' ? 'bg-purple-600 text-white' : 'bg-slate-200 text-slate-600' }} flex items-center justify-center font-bold text-sm shadow-sm">4</span>
                             <div>
-                                <h4 class="font-bold text-gray-800 text-sm">4. Feedback</h4>
-                                <p class="text-xs text-purple-600 font-medium">
+                                <h4 class="font-bold text-slate-800 text-sm">4. Feedback</h4>
+                                <p class="text-xs text-purple-700 font-semibold mt-0.5">
                                     {{ $candidatura && $candidatura->status == 'finalizado' ? 'Ver Parecer Final 📝' : 'Aguardando etapa 3' }}
                                 </p>
                             </div>
@@ -150,75 +143,75 @@
 
             </div>
 
-            <!-- ÁREA DO QUIZ (SÓ APARECE SE ELE AINDA NÃO SE CANDIDATOU) -->
             @if (!$candidatura)
-                <div x-data="candidaturaFlow()" class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-100">
+                <div x-data="candidaturaFlow()" class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-200/80 transition-all hover:shadow-md">
 
-                    <!-- ETAPA 0: TELA INICIAL DO QUIZ -->
                     <template x-if="etapa === 0">
-                        <div class="text-center py-8 space-y-4">
-                            <span class="text-5xl">📝</span>
-                            <h3 class="text-xl font-bold text-gray-800">Teste Técnico de Candidatura</h3>
-                            <p class="text-sm text-gray-500 max-w-lg mx-auto">
+                        <div class="text-center py-8 space-y-5 max-w-xl mx-auto">
+                            <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-3xl mx-auto border border-blue-100 shadow-2xs">
+                                📝
+                            </div>
+                            <h3 class="text-2xl font-extrabold text-slate-800 tracking-tight">Teste Técnico de Candidatura</h3>
+                            <p class="text-sm text-slate-500 leading-relaxed">
                                 Para concluir sua candidatura no setor de Eletroeletrônica, responda às 6 questões técnicas a seguir.
                             </p>
-                            <button @click="iniciarQuiz()" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors shadow-sm">
+                            <button @click="iniciarQuiz()" class="px-8 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0">
                                 Iniciar Teste Agora
                             </button>
                         </div>
                     </template>
 
-                    <!-- ETAPAS 1 A 6: PERGUNTAS DO QUIZ -->
                     <template x-if="etapa > 0 && etapa <= questaoList.length">
-                        <div class="space-y-6">
-                            <div class="flex items-center justify-between border-b pb-4">
-                                <span class="text-xs font-bold text-purple-600 uppercase tracking-wider" x-text="questaoList[etapa - 1].bloco"></span>
-                                <span class="text-xs text-gray-400 font-semibold" x-text="`Questão ${etapa} de ${questaoList.length}`"></span>
+                        <div class="space-y-6 max-w-2xl mx-auto">
+                            <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                                <span class="px-3 py-1 bg-purple-50 text-purple-700 border border-purple-200/60 rounded-full text-xs font-bold uppercase tracking-wider" x-text="questaoList[etapa - 1].bloco"></span>
+                                <span class="text-xs text-slate-400 font-bold tracking-wide" x-text="`Questão ${etapa} de ${questaoList.length}`"></span>
                             </div>
 
-                            <p class="text-gray-800 font-medium text-base leading-relaxed" x-text="questaoList[etapa - 1].pergunta"></p>
+                            <p class="text-slate-800 font-semibold text-base leading-relaxed" x-text="questaoList[etapa - 1].pergunta"></p>
 
                             <div class="space-y-3">
                                 <template x-for="(opcao, index) in questaoList[etapa - 1].opcoes" :key="index">
-                                    <label class="flex items-center p-4 border rounded-xl cursor-pointer hover:bg-gray-50 transition-colors">
+                                    <label class="flex items-center p-4 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 hover:border-slate-300 transition-all duration-150 group">
                                         <input type="radio"
                                                :name="`questao_${questaoList[etapa - 1].id}`"
                                                :value="opcao"
                                                x-model="respostas[questaoList[etapa - 1].id]"
-                                               class="text-blue-600 focus:ring-blue-500">
-                                        <span class="ml-3 text-sm text-gray-700" x-text="opcao"></span>
+                                               class="w-4 h-4 text-blue-600 focus:ring-blue-500 border-slate-300">
+                                        <span class="ml-3.5 text-sm font-medium text-slate-700 group-hover:text-slate-900" x-text="opcao"></span>
                                     </label>
                                 </template>
                             </div>
 
                             <button @click="proximaEtapa()"
                                     :disabled="!respostas[questaoList[etapa - 1].id]"
-                                    class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl disabled:opacity-50 transition-colors">
+                                    class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow-md">
                                 <span x-text="etapa === questaoList.length ? 'Finalizar Teste e Anexar Currículo' : 'Próxima Questão'"></span>
                             </button>
                         </div>
                     </template>
 
-                    <!-- MODAL DE UPLOAD DO CURRÍCULO -->
                     <div x-show="abrirModalCurriculo"
                          x-cloak
-                         class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                        <div class="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
-                            <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-                                📄 Anexar Currículo
-                            </h3>
-                            <p class="text-xs text-gray-500">Parabéns por concluir o teste! Agora selecione seu currículo para registrar sua candidatura.</p>
+                         class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-opacity">
+                        <div class="bg-white rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-5 border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
+                            <div>
+                                <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                                    <span>📄</span> Anexar Currículo
+                                </h3>
+                                <p class="text-xs text-slate-500 mt-1">Parabéns por concluir o teste! Agora selecione seu currículo para registrar sua candidatura.</p>
+                            </div>
 
-                            <form action="{{ route('candidaturas.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                            <form action="{{ route('candidaturas.store') }}" method="POST" enctype="multipart/form-data" class="space-y-5">
                                 @csrf
                                 <input type="hidden" name="respostas" :value="JSON.stringify(respostas)">
 
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Arquivo (PDF)</label>
-                                    <input type="file" name="curriculo" required accept=".pdf" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Arquivo (PDF)</label>
+                                    <input type="file" name="curriculo" required accept=".pdf" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 file:transition-colors cursor-pointer border border-slate-200 rounded-xl p-1 bg-slate-50/50">
                                 </div>
 
-                                <button type="submit" class="w-full py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl transition-colors shadow-sm">
+                                <button type="submit" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all duration-200 shadow-md hover:shadow-lg">
                                     Enviar Candidatura
                                 </button>
                             </form>
@@ -228,47 +221,44 @@
                 </div>
             @endif
 
-            <!-- MODAIS DINÂMICOS (SE HOUVER CANDIDATURA) -->
             @if($candidatura)
 
-                <!-- MODAL DA ENTREVISTA -->
-                <div id="modalEntrevista" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div class="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl">
-                        <h3 class="text-lg font-bold text-gray-800 mb-1 flex items-center gap-2">
-                            📅 Entrevista Agendada
+                <div id="modalEntrevista" class="hidden fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-all">
+                    <div class="bg-white rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-slate-100">
+                        <h3 class="text-xl font-bold text-slate-800 mb-1 flex items-center gap-2">
+                            <span>📅</span> Entrevista Agendada
                         </h3>
-                        <p class="text-xs text-gray-500 mb-4">Informações sobre o seu agendamento:</p>
+                        <p class="text-xs text-slate-500 mb-5">Informações sobre o seu agendamento:</p>
 
-                        <div class="space-y-3 bg-blue-50 p-4 rounded-xl text-sm border border-blue-100 text-blue-950">
-                            <p>
-                                <strong>Data/Hora:</strong>
-                                {{ $candidatura->data_entrevista ? \Carbon\Carbon::parse($candidatura->data_entrevista)->format('d/m/Y \à\s H:i') : 'A definir pelo recrutador' }}
+                        <div class="space-y-3 bg-blue-50/70 p-4 rounded-xl text-sm border border-blue-100 text-blue-950 font-medium">
+                            <p class="flex items-start gap-2">
+                                <span class="font-bold text-blue-900 min-w-24">Data/Hora:</span>
+                                <span>{{ $candidatura->data_entrevista ? \Carbon\Carbon::parse($candidatura->data_entrevista)->format('d/m/Y \à\s H:i') : 'A definir pelo recrutador' }}</span>
                             </p>
-                            <p>
-                                    <strong>Local/Sala:</strong>
-                                    {{ !empty($candidatura->local_entrevista) ? $candidatura->local_entrevista : 'A definir pelo recrutador' }}
+                            <p class="flex items-start gap-2">
+                                <span class="font-bold text-blue-900 min-w-24">Local/Sala:</span>
+                                <span>{{ !empty($candidatura->local_entrevista) ? $candidatura->local_entrevista : 'A definir pelo recrutador' }}</span>
                             </p>
                         </div>
 
-                        <button onclick="closeModal('modalEntrevista')" class="mt-5 w-full py-2.5 bg-gray-900 text-white rounded-xl font-bold hover:bg-gray-800 transition-colors">
+                        <button onclick="closeModal('modalEntrevista')" class="mt-6 w-full py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition-colors shadow-sm">
                             Fechar
                         </button>
                     </div>
                 </div>
 
-                <!-- MODAL DO FEEDBACK -->
-                <div id="modalFeedback" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div class="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl">
-                        <h3 class="text-lg font-bold text-gray-800 mb-1 flex items-center gap-2">
-                            📝 Parecer Final do Recrutador
+                <div id="modalFeedback" class="hidden fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-all">
+                    <div class="bg-white rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-slate-100">
+                        <h3 class="text-xl font-bold text-slate-800 mb-1 flex items-center gap-2">
+                            <span>📝</span> Parecer Final do Recrutador
                         </h3>
-                        <p class="text-xs text-gray-500 mb-4">Feedback conclusivo sobre o seu processo seletivo:</p>
+                        <p class="text-xs text-slate-500 mb-5">Feedback conclusivo sobre o seu processo seletivo:</p>
 
-                        <div class="p-4 bg-purple-50 rounded-xl text-purple-900 text-sm border border-purple-100 leading-relaxed whitespace-pre-line">
+                        <div class="p-4 bg-purple-50/70 rounded-xl text-purple-950 text-sm border border-purple-100 leading-relaxed whitespace-pre-line font-medium">
                             {{ $candidatura->feedback_recrutador ?? 'Nenhum parecer cadastrado até o momento.' }}
                         </div>
 
-                        <button onclick="closeModal('modalFeedback')" class="mt-5 w-full py-2.5 bg-gray-900 text-white rounded-xl font-bold hover:bg-gray-800 transition-colors">
+                        <button onclick="closeModal('modalFeedback')" class="mt-6 w-full py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition-colors shadow-sm">
                             Fechar
                         </button>
                     </div>
@@ -279,7 +269,6 @@
         </div>
     </div>
 
-    <!-- SCRIPTS -->
     <script>
         function openModal(id) {
             document.getElementById(id).classList.remove('hidden');
