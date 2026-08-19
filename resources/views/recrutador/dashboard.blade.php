@@ -90,7 +90,10 @@
                                         </span>
                                     </td>
                                     <td class="py-4 px-6 capitalize text-gray-700 font-medium">
-                                        {{ $item->vaga->titulo ?? $item->area_interesse ?? 'Vaga Não Informada' }}
+                                        @php
+                                            $vagaCorrespondente = $vagas->firstWhere('nivel', $item->nivel_sugerido_ia);
+                                        @endphp
+                                        {{ $vagaCorrespondente->titulo ?? $item->area_interesse ?? 'Vaga Não Definida' }}
                                     </td>
                                     <td class="py-4 px-6">
                                         @if ($item->status == 'aguardando_retorno')
