@@ -35,8 +35,8 @@ return new class extends Migration
 
             // Agendamento e Feedback do Recrutador
             $table->dateTime('data_entrevista')->nullable();
+            $table->string('local_entrevista')->nullable();
             $table->text('feedback_recrutador')->nullable();
-            $table->string('local_entrevista')->nullable()->after('data_entrevista');
             $table->json('trilha_links')->nullable();
 
             $table->timestamps();
