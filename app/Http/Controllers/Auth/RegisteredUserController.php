@@ -41,7 +41,7 @@ class RegisteredUserController extends Controller
         // 2. Regras de Segurança para Recrutadores / Docentes
         if ($request->role === 'recrutador') {
             // Lista de domínios institucionais permitidos
-            $dominiosAceitos = ['@sp.senai.br', '@senai.br', '@aluno.senai.br'];
+            $dominiosAceitos = ['@sp.senai.br', '@senai.br', '@aluno.senai.br', '@docente.senai.br'];
 
             $emailValido = false;
             foreach ($dominiosAceitos as $dominio) {
