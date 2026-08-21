@@ -55,7 +55,7 @@ class CandidaturaController extends Controller
             }
         }
 
-        // 4. Correção do Questionário Técnico
+        // 4. Correção do Questionário Técnico (Gabarito)
         $respostas = $request->input('respostas_questionario', []);
         $gabarito = [1 => 'B', 2 => 'D', 3 => 'B', 4 => 'A', 5 => 'B', 6 => 'B'];
         $acertos = 0;
@@ -72,30 +72,69 @@ class CandidaturaController extends Controller
         
         $contextoAnalise = $requisitosVaga . "\n\n[Resultado do Teste Técnico do Candidato: {$acertos}/6 acertos]";
 
-        // 6. Análise da IA
+        // 6. Chamada de Análise da IA Gemini
         $analiseIa = $geminiService->analisarCurriculo($textoCurriculo, $contextoAnalise);
 
         // Extração dos dados processados pela IA
         $nivelSugerido = $analiseIa['nivel_sugerido_ia'] ?? 'tecnico';
         $notaMatch     = $analiseIa['nota_match'] ?? 70;
-        $resumoIa      = $analiseIa['resumo_ia'] ?? "Parecer Técnico: O candidato obteve {$acertos}/6 acertos no teste técnico.\n• Pontos Fortes: Base conceitual em eletroeletrônica.\n• Lacunas Técnicas: Necessita aprofundamento prático em programação de CLP.\n• Recomendação: Candidato promissor para validação humana.";
-        $linksEstudo   = $analiseIa['recomendacoes_links'] ?? "Aprimore seus conhecimentos em: https://www.sp.senai.br";
 
-        // Define a Área de Interesse automaticamente (Pega o nome da vaga vinculada ou deixa a IA/padrão direcionar)
-        $areaDirecionadaIa = $vaga->titulo ?? $vaga->area ?? 'Automação Industrial';
+        // Parecer exclusivo para o RH / Recrutador
+        $resumoIa = $analiseIa['resumo_ia'] ?? "PARECER TÉCNICO EXCLUSIVO AO RH: O candidato obteve {$acertos}/6 acertos no teste técnico.\n• Pontos Fortes: Base conceitual em eletroeletrônica e formação inicial.\n• Lacunas Técnicas: Necessita aprofundamento prático em programação de CLP e NR-10.\n• Recomendação: Candidato promissor para validação humana.";
 
-        // 7. Salva no Banco de Dados
+        // Mensagem direta e amigável ao Candidato
+        $orientacaoCandidato = $analiseIa['orientacao_candidato'] ?? "Identificamos que você possui uma boa base conceitual! Para fortalecer seu perfil técnico e avançar na carreira, recomendamos focar no aprimoramento de CLP, comandos elétricos e certificações regulamentares.";
+
+        // Lista de Fallbacks caso a API não devolva o JSON formatado
+        $fallbackCursos = implode("\n", [
+            "• Cursos SENAI SP: https://www.sp.senai.br/cursos",
+            "• NR-10 (Segurança Elétrica): https://www.sp.senai.br/curso/nr-10-seguranca-em-instalacoes-e-servicos-com-eletricidade/75949",
+            "• NR-33 (Espaços Confinados): https://www.sp.senai.br/curso/nr-33-seguranca-e-saude-nos-trabalhos-em-espacos-confinados-para-trabalhadores-autorizados-e-vigias/89204",
+            "• NR-35 (Trabalho em Altura): https://www.sp.senai.br/curso/nr-35-trabalho-em-altura/75951",
+            "• AutoCAD (SENAI Play Gratuito): https://play.senai.br/curso/9fa43863-34b9-11f0-8b99-96b9b09bc812",
+            "• AutoCAD 2D (SENAI SP): https://www.sp.senai.br/curso/autocad-2d/110124",
+            "• Revit (SESI SENAI): https://cursos.sesisenai.org.br/cursos-profissionalizantes/autodesk-revit/3888",
+            "• IA AI-900 (Microsoft Learn): https://learn.microsoft.com/pt-br/credentials/certifications/exams/ai-900/",
+            "• CCNA Redes (Cisco Skills for All): https://skillsforall.com/",
+            "• Técnico em Redes (SENAI): https://www.sp.senai.br/curso/tecnico-em-redes-de-computadores/94541",
+            "• Power BI (Microsoft Learn): https://learn.microsoft.com/pt-br/power-bi/",
+            "• Power BI (SENAI SP): https://www.sp.senai.br/curso/desvendando-o-power-bi/96677",
+            "• Autodesk Fusion (Licença Estudante): https://www.autodesk.com/education/edu-software/overview",
+            "• Eletricista de Redes (SENAI SP): https://www.sp.senai.br/curso/eletricista-de-redes-de-distribuicao-de-energia-eletrica/88165",
+            "• Engenharia Elétrica (UNIMAR): https://oficial.unimar.br/cursos/engenharia-eletrica/",
+            "• Ciência da Computação (UNIMAR): https://oficial.unimar.br/cursos/ciencia-da-computacao/",
+            "• Engenharia de Software (UNIMAR EAD): https://ead.unimar.br/cursos/engenharia-de-software/"
+        ]);
+
+        $fallbackPortais = implode("\n", [
+            "• LinkedIn: https://www.linkedin.com",
+            "• Vagas.com: https://www.vagas.com.br",
+            "• Catho: https://www.catho.com.br"
+        ]);
+
+        // Trata os links vindo do Gemini ou usa os fallbacks
+        $linksCursos  = $analiseIa['recomendacoes_links']['cursos'] ?? $fallbackCursos;
+        $linksPortais = $analiseIa['recomendacoes_links']['portais_curriculo'] ?? $fallbackPortais;
+
+        // Define a Área de Interesse com base na Vaga vinculada
+        $areaDirecionada = $vaga->titulo ?? $vaga->area ?? 'Automação Industrial / Eletroeletrônica';
+
+        // 7. Salva a Candidatura no Banco de Dados
         Candidatura::create([
             'user_id'                => Auth::id(),
             'vaga_id'                => $vagaId,
-            'area_interesse'         => $areaDirecionadaIa,
+            'area_interesse'         => $areaDirecionada,
             'caminho_pdf'            => $caminhoPdf,
             'texto_extraido'         => $textoCurriculo,
             'respostas_questionario' => $respostas,
             'nota_match'             => $notaMatch,
             'nivel_sugerido_ia'      => $nivelSugerido,
             'resumo_ia'              => $resumoIa,
-            'trilha_links'           => json_encode(['recomendacao_ia' => $linksEstudo]),
+            'trilha_links'           => json_encode([
+                'orientacao' => $orientacaoCandidato,
+                'cursos'     => $linksCursos,
+                'portais'    => $linksPortais,
+            ]),
             'status'                 => 'aguardando_retorno',
         ]);
 
