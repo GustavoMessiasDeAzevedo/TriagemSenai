@@ -15,8 +15,8 @@ class GeminiService
         // Pega do config do Laravel ou direto do ambiente
         $this->apiKey = config('services.gemini.key') ?? env('GEMINI_API_KEY');
         
-        // Endpoint atualizado com o modelo gemini-2.5-flash
-        $this->baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+        // Endpoint atualizado com o modelo estável gemini-3.6-flash
+        $this->baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent';
     }
 
     public function analisarCurriculo(string $textoCurriculo, string $contextoAnalise): array
@@ -90,10 +90,15 @@ Analise os dados do candidato e retorne EXATAMENTE um JSON no seguinte formato:
 
 REGRAS:
 1. No campo 'cursos', selecione APENAS de 2 a 4 links adequados às lacunas.
-2. Responda APENAS com o JSON válido sem formatação Markdown externa.
+2. Responda APENAS com o JSON válido.
 ";
 
-            $response = Http::post("{$this->baseUrl}?key={$this->apiKey}", [
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+            ])->post("{$this->baseUrl}?key={$this->apiKey}", [
+                'generationConfig' => [
+                    'response_mime_type' => 'application/json'
+                ],
                 'contents' => [
                     [
                         'parts' => [
