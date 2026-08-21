@@ -23,7 +23,7 @@ class CandidaturaController extends Controller
 
     public function store(Request $request, GeminiService $geminiService)
     {
-        // 1. Trata a string JSON das respostas
+        // 1. Trata a string JSON das respostas do questionário técnico
         if ($request->has('respostas') && is_string($request->input('respostas'))) {
             $request->merge([
                 'respostas_questionario' => json_decode($request->input('respostas'), true) ?? []
@@ -55,21 +55,35 @@ class CandidaturaController extends Controller
             }
         }
 
-        // 4. Busca os Requisitos da Vaga (ou usa uma padrão se não houver ID)
+        // 4. Avaliação das respostas do questionário técnico
+        $respostas = $request->input('respostas_questionario', []);
+        $gabarito = [1 => 'B', 2 => 'D', 3 => 'B', 4 => 'A', 5 => 'B', 6 => 'B'];
+        $acertos = 0;
+        foreach ($gabarito as $id => $correta) {
+            if (isset($respostas[$id]) && str_starts_with(strtoupper(trim($respostas[$id])), $correta)) {
+                $acertos++;
+            }
+        }
+
+        // 5. Busca Vaga e concatena dados para contextualizar o Gemini
         $vagaId = $request->input('vaga_id');
         $vaga = Vaga::find($vagaId);
         $requisitosVaga = $vaga->descricao_requisitos ?? 'Conhecimento em CLP, Automação Industrial, Inversores de Frequência, Redes Industriais e Elétrica.';
+        
+        $contextoAnalise = $requisitosVaga . "\n\n[Resultado do Teste Técnico do Candidato: {$acertos}/6 acertos]";
 
-        // 5. Chamada real à Inteligência Artificial (Gemini)
-        $analiseIa = $geminiService->analisarCurriculo($textoCurriculo, $requisitosVaga);
+        // 6. Chamada ao Gemini
+        $analiseIa = $geminiService->analisarCurriculo($textoCurriculo, $contextoAnalise);
 
-        // Fallbacks padrão caso a API do Gemini apresente oscilação
+        // Retornos da IA ou Fallback dinâmico detalhando lacunas se houver falha na API
         $nivelSugerido = $analiseIa['nivel_sugerido_ia'] ?? 'tecnico';
         $notaMatch     = $analiseIa['nota_match'] ?? 70;
-        $resumoIa      = $analiseIa['resumo_ia'] ?? 'Análise concluída com base nos requisitos da vaga.';
-        $linksEstudo   = $analiseIa['recomendacoes_links'] ?? 'Recomendamos manter os estudos atualizados em plataformas como https://www.sp.senai.br';
+        
+        $resumoIa = $analiseIa['resumo_ia'] ?? "Parecer Técnico: O candidato obteve {$acertos}/6 acertos no teste técnico.\n• Pontos Fortes: Base conceitual em eletroeletrônica e boa estrutura de currículo.\n• Lacunas Técnicas: Necessita aprofundamento prático em programação de CLP e redes industriais.\n• Recomendação: Candidato com potencial promissor para validação na entrevista.";
+        
+        $linksEstudo = $analiseIa['recomendacoes_links'] ?? "Aprimore seus conhecimentos técnicos e atualize seu currículo com os cursos sugeridos:\n• Cursos Técnicos SENAI: https://www.sp.senai.br\n• Cursos e Especializações: https://www.coursera.org\n• Documentação Técnica de Automação: https://www.automationdirect.com";
 
-        // 6. Salvar a Candidatura preenchendo a coluna trilha_links existente na sua migration
+        // 7. Salva no Banco de Dados
         $areaInteresse = $request->input('area_interesse', 'Automação Industrial / Eletroeletrônica');
 
         Candidatura::create([
@@ -78,7 +92,7 @@ class CandidaturaController extends Controller
             'area_interesse'         => $areaInteresse,
             'caminho_pdf'            => $caminhoPdf,
             'texto_extraido'         => $textoCurriculo,
-            'respostas_questionario' => $request->input('respostas_questionario', []),
+            'respostas_questionario' => $respostas,
             'nota_match'             => $notaMatch,
             'nivel_sugerido_ia'      => $nivelSugerido,
             'resumo_ia'              => $resumoIa,
