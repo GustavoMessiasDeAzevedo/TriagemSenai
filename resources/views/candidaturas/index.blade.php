@@ -247,7 +247,7 @@
                     </div>
                 </div>
 
-                <!-- MODAL DE FEEDBACK COM ANALISE IA E RECOMENDAÇÕES/LINKS -->
+                <!-- MODAL DE FEEDBACK COM ANÁLISE IA COMPLETA E RECOMENDAÇÕES/LINKS -->
                 <div id="modalFeedback" class="hidden fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-all">
                     <div class="bg-white rounded-2xl p-6 sm:p-8 max-w-xl w-full shadow-2xl border border-slate-100 space-y-5 max-h-[90vh] overflow-y-auto">
                         
@@ -258,40 +258,57 @@
                             <p class="text-xs text-slate-500">Feedback e avaliação técnica sobre o seu processo seletivo:</p>
                         </div>
 
-                        <!-- ANÁLISE IDENTIFICADA PELA IA -->
+                        <!-- PARECER TÉCNICO GERADO PELA IA (MOSTRA PONTOS FORTES, LACUNAS E MATCH) -->
                         @if($candidatura->resumo_ia)
                             <div class="p-4 bg-slate-50 border border-slate-200/80 rounded-xl space-y-2">
                                 <div class="flex items-center justify-between">
-                                    <span class="text-xs font-extrabold text-slate-500 uppercase tracking-wider">🤖 Análise do Perfil (IA)</span>
-                                    <span class="px-2.5 py-0.5 bg-purple-100 text-purple-700 text-xs font-bold rounded-full uppercase">
-                                        Nível {{ $candidatura->nivel_sugerido_ia ?? 'Técnico' }}
-                                    </span>
+                                    <span class="text-xs font-extrabold text-slate-500 uppercase tracking-wider">🤖 Análise Técnica (IA)</span>
+                                    <div class="flex items-center gap-2">
+                                        @if($candidatura->nota_match)
+                                            <span class="px-2.5 py-0.5 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-full">
+                                                Match {{ $candidatura->nota_match }}%
+                                            </span>
+                                        @endif
+                                        <span class="px-2.5 py-0.5 bg-purple-100 text-purple-700 text-xs font-bold rounded-full uppercase">
+                                            Nível {{ $candidatura->nivel_sugerido_ia ?? 'Técnico' }}
+                                        </span>
+                                    </div>
                                 </div>
-                                <p class="text-xs text-slate-700 leading-relaxed font-medium">
+                                <p class="text-xs text-slate-700 leading-relaxed font-medium whitespace-pre-line">
                                     {{ $candidatura->resumo_ia }}
                                 </p>
                             </div>
                         @endif
 
-                        <!-- RECOMENDAÇÕES E RECADO COM DETECÇÃO AUTOMÁTICA DE LINKS -->
+                        <!-- RECADO DO RECRUTADOR E RECOMENDAÇÕES DE ESTUDO (LINKS CLICÁVEIS) -->
                         <div class="space-y-2">
-                            <span class="text-xs font-extrabold text-slate-500 uppercase tracking-wider">💬 Recado do Recrutador & Recomendações</span>
+                            <span class="text-xs font-extrabold text-slate-500 uppercase tracking-wider">💬 Recado & Recomendação de Cursos</span>
                             <div class="p-4 bg-purple-50/70 rounded-xl text-purple-950 text-sm border border-purple-100 leading-relaxed whitespace-pre-line font-medium">
                                 @php
-                                    // Utiliza o feedback do recrutador ou o campo de recomendações/links gerado pelo Gemini
-                                    $textoFeedback = $candidatura->feedback_recrutador 
-                                        ?? $candidatura->recomendacoes_links_ia 
-                                        ?? 'Nenhum parecer cadastrado até o momento.';
+                                    // Pega os links gerados na coluna trilha_links (JSON)
+                                    $trilha = is_string($candidatura->trilha_links) 
+                                        ? json_decode($candidatura->trilha_links, true) 
+                                        : $candidatura->trilha_links;
 
-                                    // Expressão regular que reconhece URLs com ou sem protocolo (http, https, www, domínios .com, .br, etc)
+                                    $recomendacaoIa = $trilha['recomendacao_ia'] ?? '';
+                                    $recadoRecrutador = $candidatura->feedback_recrutador ?? '';
+
+                                    // Formata o texto unindo o recado do recrutador e as orientações da IA
+                                    $partes = array_filter([$recadoRecrutador, $recomendacaoIa]);
+                                    $textoFinal = !empty($partes) 
+                                        ? implode("\n\n---\n\n", $partes) 
+                                        : 'Nenhum parecer cadastrado até o momento.';
+
+                                    // Transformação de qualquer URL em link <a> clicável com target="_blank"
                                     $pattern = '/\b(?:https?:\/\/|www\.)[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,}(?:\/[^\s<]*)?/i';
 
                                     $textoComLinks = preg_replace_callback($pattern, function($matches) {
                                         $url = $matches[0];
                                         $href = preg_match('/^https?:\/\//i', $url) ? $url : 'https://' . $url;
                                         return '<a href="' . $href . '" target="_blank" class="text-purple-700 underline font-bold hover:text-purple-900 transition-colors">' . $url . '</a>';
-                                    }, e($textoFeedback));
+                                    }, e($textoFinal));
                                 @endphp
+
                                 {!! $textoComLinks !!}
                             </div>
                         </div>
