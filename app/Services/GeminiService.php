@@ -38,8 +38,8 @@ Responda EXCLUSIVAMENTE em formato JSON puro, sem blocos de código Markdown (n�
 {
   \"nivel_sugerido_ia\": \"basico|tecnico|avancado\",
   \"nota_match\": 85,
-  \"resumo_ia\": \"Parecer do Engenheiro ao RH: Destaque os pontos fortes técnicos, gargalos para o nível acima e a justificativa se vale a pena apostar neste talento para validação humana.\",
-  \"recomendacoes_links\": \"Mensagem motivacional para o candidato com links de estudo recomendados (ex: Confira este curso em https://www.sp.senai.br para aprimorar seus conhecimentos em CLP).\"
+  \"resumo_ia\": \"Parecer do Engenheiro ao RH: Destaque detalhadamente os pontos fortes técnicos, as lacunas/gargalos técnicos específicos identificados no currículo e a justificativa se vale a pena apostar neste talento para validação humana.\",
+  \"recomendacoes_links\": \"Mensagem motivacional para o candidato detalhando as lacunas técnicas encontradas e indicando links reais de estudo, cursos e plataformas para ele se capacitar e atualizar o currículo (ex: Recomendamos estudar CLP no SENAI em https://www.sp.senai.br ou documentações na https://www.automationdirect.com).\"
 }";
 
         try {
@@ -51,6 +51,9 @@ Responda EXCLUSIVAMENTE em formato JSON puro, sem blocos de código Markdown (n�
                         ],
                     ],
                 ],
+                'generationConfig' => [
+                    'responseMimeType' => 'application/json',
+                ]
             ]);
 
             if ($response->successful()) {
@@ -59,8 +62,11 @@ Responda EXCLUSIVAMENTE em formato JSON puro, sem blocos de código Markdown (n�
 
                 if ($textoResposta) {
                     $jsonLimpo = trim(str_replace(['```json', '```'], '', $textoResposta));
+                    $resultadoDecodificado = json_decode($jsonLimpo, true);
 
-                    return json_decode($jsonLimpo, true);
+                    if (is_array($resultadoDecodificado)) {
+                        return $resultadoDecodificado;
+                    }
                 }
             }
 
