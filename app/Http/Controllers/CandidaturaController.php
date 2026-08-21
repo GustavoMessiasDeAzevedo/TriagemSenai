@@ -23,7 +23,7 @@ class CandidaturaController extends Controller
 
     public function store(Request $request, GeminiService $geminiService)
     {
-        // 1. Trata a string JSON das respostas do questionário técnico
+        // 1. Trata a string JSON das respostas do questionário
         if ($request->has('respostas') && is_string($request->input('respostas'))) {
             $request->merge([
                 'respostas_questionario' => json_decode($request->input('respostas'), true) ?? []
@@ -36,7 +36,7 @@ class CandidaturaController extends Controller
             'respostas_questionario' => 'nullable|array',
         ]);
 
-        // 3. Upload do arquivo PDF do Currículo e Leitura de Texto
+        // 3. Upload e leitura de texto do PDF
         $caminhoPdf = null;
         $textoCurriculo = '';
 
@@ -55,7 +55,7 @@ class CandidaturaController extends Controller
             }
         }
 
-        // 4. Avaliação das respostas do questionário técnico
+        // 4. Correção do Questionário Técnico
         $respostas = $request->input('respostas_questionario', []);
         $gabarito = [1 => 'B', 2 => 'D', 3 => 'B', 4 => 'A', 5 => 'B', 6 => 'B'];
         $acertos = 0;
@@ -65,31 +65,30 @@ class CandidaturaController extends Controller
             }
         }
 
-        // 5. Busca Vaga e concatena dados para contextualizar o Gemini
+        // 5. Busca Vaga para contextualizar o Gemini
         $vagaId = $request->input('vaga_id');
         $vaga = Vaga::find($vagaId);
         $requisitosVaga = $vaga->descricao_requisitos ?? 'Conhecimento em CLP, Automação Industrial, Inversores de Frequência, Redes Industriais e Elétrica.';
         
         $contextoAnalise = $requisitosVaga . "\n\n[Resultado do Teste Técnico do Candidato: {$acertos}/6 acertos]";
 
-        // 6. Chamada ao Gemini
+        // 6. Análise da IA
         $analiseIa = $geminiService->analisarCurriculo($textoCurriculo, $contextoAnalise);
 
-        // Retornos da IA ou Fallback dinâmico detalhando lacunas se houver falha na API
+        // Extração dos dados processados pela IA
         $nivelSugerido = $analiseIa['nivel_sugerido_ia'] ?? 'tecnico';
         $notaMatch     = $analiseIa['nota_match'] ?? 70;
-        
-        $resumoIa = $analiseIa['resumo_ia'] ?? "Parecer Técnico: O candidato obteve {$acertos}/6 acertos no teste técnico.\n• Pontos Fortes: Base conceitual em eletroeletrônica e boa estrutura de currículo.\n• Lacunas Técnicas: Necessita aprofundamento prático em programação de CLP e redes industriais.\n• Recomendação: Candidato com potencial promissor para validação na entrevista.";
-        
-        $linksEstudo = $analiseIa['recomendacoes_links'] ?? "Aprimore seus conhecimentos técnicos e atualize seu currículo com os cursos sugeridos:\n• Cursos Técnicos SENAI: https://www.sp.senai.br\n• Cursos e Especializações: https://www.coursera.org\n• Documentação Técnica de Automação: https://www.automationdirect.com";
+        $resumoIa      = $analiseIa['resumo_ia'] ?? "Parecer Técnico: O candidato obteve {$acertos}/6 acertos no teste técnico.\n• Pontos Fortes: Base conceitual em eletroeletrônica.\n• Lacunas Técnicas: Necessita aprofundamento prático em programação de CLP.\n• Recomendação: Candidato promissor para validação humana.";
+        $linksEstudo   = $analiseIa['recomendacoes_links'] ?? "Aprimore seus conhecimentos em: https://www.sp.senai.br";
+
+        // Define a Área de Interesse automaticamente (Pega o nome da vaga vinculada ou deixa a IA/padrão direcionar)
+        $areaDirecionadaIa = $vaga->titulo ?? $vaga->area ?? 'Automação Industrial';
 
         // 7. Salva no Banco de Dados
-        $areaInteresse = $request->input('area_interesse', 'Automação Industrial / Eletroeletrônica');
-
         Candidatura::create([
             'user_id'                => Auth::id(),
             'vaga_id'                => $vagaId,
-            'area_interesse'         => $areaInteresse,
+            'area_interesse'         => $areaDirecionadaIa,
             'caminho_pdf'            => $caminhoPdf,
             'texto_extraido'         => $textoCurriculo,
             'respostas_questionario' => $respostas,
