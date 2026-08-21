@@ -7,17 +7,26 @@ use Illuminate\Support\Facades\Log;
 
 class GeminiService
 {
-    protected string $apiKey;
+    protected ?string $apiKey = null;
     protected string $baseUrl;
 
     public function __construct()
     {
-        $this->apiKey = config('services.gemini.key', env('GEMINI_API_KEY'));
-        $this->baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+        // Pega do config do Laravel ou direto do ambiente
+        $this->apiKey = config('services.gemini.key') ?? env('GEMINI_API_KEY');
+        
+        // Endpoint atualizado com o modelo gemini-2.5-flash
+        $this->baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
     }
 
     public function analisarCurriculo(string $textoCurriculo, string $contextoAnalise): array
     {
+        // Se a chave não for encontrada no servidor, registra no log e aciona fallback
+        if (empty($this->apiKey)) {
+            Log::error('Gemini API: A chave GEMINI_API_KEY não foi encontrada nas variáveis de ambiente.');
+            return $this->fallbackTrilha();
+        }
+
         try {
             $bancoCursos = "
 - Cursos SENAI SP: https://www.sp.senai.br/cursos
@@ -36,7 +45,7 @@ class GeminiService
 - Eletricista de Redes (SENAI SP): https://www.sp.senai.br/curso/eletricista-de-redes-de-distribuicao-de-energia-eletrica/88165
 - Engenharia Elétrica (UNIMAR): https://oficial.unimar.br/cursos/engenharia-eletrica/
 - Ciência da Computação (UNIMAR): https://oficial.unimar.br/cursos/ciencia-da-computacao/
-- Engenharia de Software (UNIMAR EAD): https://ead.unimar.br/cursos/engenharia-de-software/
+- Engenharia de Software (UNIMAR EAD): https://ead.unimar.br/cursos/engenharia-of-software/
 ";
 
             $bancoPortais = "
@@ -70,19 +79,18 @@ Analise os dados do candidato e retorne EXATAMENTE um JSON no seguinte formato:
 
 {
   \"nivel_sugerido_ia\": \"basico | tecnico | avancado\",
-  \"nota_match\": 75,
-  \"resumo_ia\": \"PARECER TÉCNICO EXCLUSIVO AO RH: O candidato obteve X/6 acertos no teste técnico. • Pontos Fortes: [descreva]. • Lacunas Técnicas: [descreva os erros]. • Recomendação: [orientação ao RH].\",
-  \"orientacao_candidato\": \"FEEDBACK HUMANIZADO PARA O CANDIDATO: Escreva uma mensagem motivadora e técnica. Destaque a base conceitual e dê conselhos de carreira de acordo com os erros dele.\",
+  \"nota_match\": 85,
+  \"resumo_ia\": \"PARECER TÉCNICO EXCLUSIVO AO RH: Descreva o desempenho real, pontos fortes e erros com base nas respostas enviadas.\",
+  \"orientacao_candidato\": \"FEEDBACK HUMANIZADO PARA O CANDIDATO: Escreva uma mensagem motivadora alinhada ao perfil dele.\",
   \"recomendacoes_links\": {
-    \"cursos\": \"SELECIONE APENAS DE 2 A 4 LINKS do BANCO DE CURSOS DISPONÍVEIS que atendam EXATAMENTE às lacunas descritas na orientação do candidato. NÃO inclua a lista completa de cursos! Formato: • Nome do Curso: URL\",
-    \"portais_curriculo\": \"Mantenha a lista com TODOS os portais do banco no formato: • Nome do Portal: URL\"
+    \"cursos\": \"SELECIONE APENAS DE 2 A 4 LINKS do BANCO DE CURSOS DISPONÍVEIS no formato: • Nome do Curso: URL\",
+    \"portais_curriculo\": \"Mantenha os portais no formato: • Nome do Portal: URL\"
   }
 }
 
 REGRAS:
-1. No campo 'cursos', NUNCA retorne todos os cursos. Escolha APENAS de 2 a 4 links que resolvam os pontos fracos do candidato.
-2. No campo 'portais_curriculo', mantenha todos os portais.
-3. Responda apenas com o JSON válido.
+1. No campo 'cursos', selecione APENAS de 2 a 4 links adequados às lacunas.
+2. Responda APENAS com o JSON válido sem formatação Markdown externa.
 ";
 
             $response = Http::post("{$this->baseUrl}?key={$this->apiKey}", [
@@ -105,13 +113,11 @@ REGRAS:
                 }
             }
 
-            Log::warning('Gemini API retornou resposta fora do padrão esperado.', ['response' => $response->body()]);
+            Log::error('Gemini API HTTP Error: ' . $response->status(), ['body' => $response->body()]);
             return $this->fallbackTrilha();
 
         } catch (\Throwable $e) {
-            Log::error('Erro ao conectar ou processar no GeminiService: ' . $e->getMessage(), [
-                'exception' => $e
-            ]);
+            Log::error('Erro ao conectar na API do Gemini: ' . $e->getMessage());
             return $this->fallbackTrilha();
         }
     }
