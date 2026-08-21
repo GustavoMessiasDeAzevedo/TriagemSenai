@@ -65,16 +65,18 @@ Responda EXCLUSIVAMENTE em formato JSON puro, sem formatação Markdown (não us
 }";
 
         try {
-            $response = Http::post("{$this->baseUrl}?key={$this->apiKey}", [
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+            ])->post("{$this->baseUrl}?key={$this->apiKey}", [
                 'contents' => [
                     [
                         'parts' => [
-                            ['text' => $prompt],
-                        ],
-                    ],
+                            ['text' => $prompt]
+                        ]
+                    ]
                 ],
                 'generationConfig' => [
-                    'responseMimeType' => 'application/json',
+                    'responseMimeType' => 'application/json'
                 ]
             ]);
 
@@ -92,12 +94,12 @@ Responda EXCLUSIVAMENTE em formato JSON puro, sem formatação Markdown (não us
                 }
             }
 
-            Log::error('Erro API Gemini: '.$response->body());
-
+            Log::error('Erro API Gemini: ' . $response->body());
             return null;
         } catch (\Exception $e) {
-            Log::error('Exceção GeminiService: '.$e->getMessage());
+            Log::error('Exceção GeminiService: ' . $e->getMessage());
             return null;
         }
+        
     }
 }
