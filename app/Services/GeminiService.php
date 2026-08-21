@@ -19,8 +19,11 @@ class GeminiService
         $this->baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent';
     }
 
-    public function analisarCurriculo(string $textoCurriculo, string $contextoAnalise): array
+public function analisarCurriculo(string $textoCurriculo, string $contextoAnalise): array
     {
+        // Aumenta o tempo limite de execução do PHP para evitar a queda aos 30 segundos
+        set_time_limit(90);
+
         // Se a chave não for encontrada no servidor, registra no log e aciona fallback
         if (empty($this->apiKey)) {
             Log::error('Gemini API: A chave GEMINI_API_KEY não foi encontrada nas variáveis de ambiente.');
@@ -93,20 +96,22 @@ REGRAS:
 2. Responda APENAS com o JSON válido.
 ";
 
-            $response = Http::withHeaders([
-                'Content-Type' => 'application/json',
-            ])->post("{$this->baseUrl}?key={$this->apiKey}", [
-                'generationConfig' => [
-                    'response_mime_type' => 'application/json'
-                ],
-                'contents' => [
-                    [
-                        'parts' => [
-                            ['text' => $prompt]
+            // timeout(60) aguarda até 60s a resposta do Gemini
+            $response = Http::timeout(60)
+                ->withHeaders([
+                    'Content-Type' => 'application/json',
+                ])->post("{$this->baseUrl}?key={$this->apiKey}", [
+                    'generationConfig' => [
+                        'response_mime_type' => 'application/json'
+                    ],
+                    'contents' => [
+                        [
+                            'parts' => [
+                                ['text' => $prompt]
+                            ]
                         ]
                     ]
-                ]
-            ]);
+                ]);
 
             if ($response->successful()) {
                 $content = $response->json('candidates.0.content.parts.0.text');
