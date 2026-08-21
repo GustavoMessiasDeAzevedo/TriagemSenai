@@ -23,7 +23,7 @@
             @endif
 
             @php
-                $candidatura = $candidaturas->sortByDesc('updated_at')->first();
+                $candidatura = $candidaturas ? $candidaturas->sortByDesc('updated_at')->first() : null;
             @endphp
 
             <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-200/80 space-y-8 transition-all hover:shadow-md">
