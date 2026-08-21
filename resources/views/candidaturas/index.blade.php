@@ -247,18 +247,49 @@
                     </div>
                 </div>
 
+                <!-- MODAL DE FEEDBACK COM ANALISE IA E LINKS CLICÁVEIS -->
                 <div id="modalFeedback" class="hidden fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-all">
-                    <div class="bg-white rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-slate-100">
-                        <h3 class="text-xl font-bold text-slate-800 mb-1 flex items-center gap-2">
-                            <span>📝</span> Parecer Final do Recrutador
-                        </h3>
-                        <p class="text-xs text-slate-500 mb-5">Feedback conclusivo sobre o seu processo seletivo:</p>
-
-                        <div class="p-4 bg-purple-50/70 rounded-xl text-purple-950 text-sm border border-purple-100 leading-relaxed whitespace-pre-line font-medium">
-                            {{ $candidatura->feedback_recrutador ?? 'Nenhum parecer cadastrado até o momento.' }}
+                    <div class="bg-white rounded-2xl p-6 sm:p-8 max-w-xl w-full shadow-2xl border border-slate-100 space-y-5 max-h-[90vh] overflow-y-auto">
+                        
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-800 mb-1 flex items-center gap-2">
+                                <span>📝</span> Parecer Final do Recrutador
+                            </h3>
+                            <p class="text-xs text-slate-500">Feedback e avaliação técnica sobre o seu processo seletivo:</p>
                         </div>
 
-                        <button onclick="closeModal('modalFeedback')" class="mt-6 w-full py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition-colors shadow-sm">
+                        <!-- ANÁLISE IDENTIFICADA PELA IA -->
+                        @if($candidatura->resumo_ia)
+                            <div class="p-4 bg-slate-50 border border-slate-200/80 rounded-xl space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-extrabold text-slate-500 uppercase tracking-wider">🤖 Análise do Perfil (IA)</span>
+                                    <span class="px-2.5 py-0.5 bg-purple-100 text-purple-700 text-xs font-bold rounded-full uppercase">
+                                        Nível {{ $candidatura->nivel_sugerido_ia ?? 'Técnico' }}
+                                    </span>
+                                </div>
+                                <p class="text-xs text-slate-700 leading-relaxed font-medium">
+                                    {{ $candidatura->resumo_ia }}
+                                </p>
+                            </div>
+                        @endif
+
+                        <!-- MENSAGEM DO RECRUTADOR COM LINKS AUTOMATICAMENTE CLICÁVEIS -->
+                        <div class="space-y-2">
+                            <span class="text-xs font-extrabold text-slate-500 uppercase tracking-wider">💬 Recado do Recrutador & Recomendações</span>
+                            <div class="p-4 bg-purple-50/70 rounded-xl text-purple-950 text-sm border border-purple-100 leading-relaxed whitespace-pre-line font-medium">
+                                @php
+                                    $textoFeedback = $candidatura->feedback_recrutador ?? 'Nenhum parecer cadastrado até o momento.';
+                                    $textoComLinks = preg_replace(
+                                        '/(https?:\/\/[^\s]+)/',
+                                        '<a href="$1" target="_blank" class="text-purple-700 underline font-bold hover:text-purple-900 transition-colors">$1</a>',
+                                        e($textoFeedback)
+                                    );
+                                @endphp
+                                {!! $textoComLinks !!}
+                            </div>
+                        </div>
+
+                        <button onclick="closeModal('modalFeedback')" class="w-full py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition-colors shadow-sm">
                             Fechar
                         </button>
                     </div>
