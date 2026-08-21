@@ -25,6 +25,7 @@ Sua missão é fazer a triagem técnica inicial deste currículo e enviar um par
 - Como engenheiro, você sabe que é raríssimo um candidato preencher 100% dos requisitos de uma vaga de nível **Avançado**. 
 - Busque por **potencial de crescimento**: se o candidato tem uma base sólida em lógica de programação, elétrica ou dominou plataformas correlatas (ex: Siemens, Rockwell, Schneider), avalie se ele é um talento promissor capaz de evoluir para o nível avançado a curto/médio prazo.
 - Dê peso para formação acadêmica/técnica, projetos práticos e capacidade de rápida adaptação.
+- **IMPORTANTE:** Caso identifique pontos a melhorar ou para evolução do candidato, inclua links reais de estudo, cursos gratuitos ou documentações (ex: https://www.sp.senai.br, https://www.coursera.org, https://www.automationdirect.com).
 
 ### VAGAS DISPONÍVEIS:
 {$requisitosVaga}
@@ -37,8 +38,10 @@ Responda EXCLUSIVAMENTE em formato JSON puro, sem blocos de código Markdown (n�
 {
   \"nivel_sugerido_ia\": \"basico|tecnico|avancado\",
   \"nota_match\": 85,
-  \"resumo_ia\": \"Parecer do Engenheiro ao RH: Destaque os pontos fortes técnicos, gargalos para o nível acima e a justificativa se vale a pena apostar neste talento para validação humana.\"
+  \"resumo_ia\": \"Parecer do Engenheiro ao RH: Destaque os pontos fortes técnicos, gargalos para o nível acima e a justificativa se vale a pena apostar neste talento para validação humana.\",
+  \"recomendacoes_links\": \"Mensagem motivacional para o candidato com links de estudo recomendados (ex: Confira este curso em https://www.sp.senai.br para aprimorar seus conhecimentos em CLP).\"
 }";
+
         try {
             $response = Http::post("{$this->baseUrl}?key={$this->apiKey}", [
                 'contents' => [
@@ -52,7 +55,7 @@ Responda EXCLUSIVAMENTE em formato JSON puro, sem blocos de código Markdown (n�
 
             if ($response->successful()) {
                 $dados = $response->json();
-                $textoResposta = $dados['candidatos'][0]['content']['parts'][0]['text'] ?? null;
+                $textoResposta = $dados['candidates'][0]['content']['parts'][0]['text'] ?? null;
 
                 if ($textoResposta) {
                     $jsonLimpo = trim(str_replace(['```json', '```'], '', $textoResposta));
@@ -65,7 +68,8 @@ Responda EXCLUSIVAMENTE em formato JSON puro, sem blocos de código Markdown (n�
 
             return null;
         } catch (\Exception $e) {
-
+            Log::error('Exceção GeminiService: '.$e->getMessage());
+            return null;
         }
     }
 }
