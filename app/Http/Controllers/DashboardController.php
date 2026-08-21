@@ -13,7 +13,6 @@ class DashboardController extends Controller
      */
     public function index(Request $request)
     {
-        // Traz todas as candidaturas ordenadas pela melhor nota da IA
         $query = Candidatura::with(['user', 'vaga']);
 
         if ($request->filled('nivel')) {
@@ -33,25 +32,22 @@ class DashboardController extends Controller
     /**
      * Atualiza o Status, Agendamento, Local da Entrevista e Feedback pro Aluno.
      */
-    // 
     public function update(Request $request, Candidatura $candidatura)
-{
-    $request->validate([
-        'status' => 'required|in:aguardando_retorno,entrevista_agendada,finalizado',
-        'data_entrevista' => 'nullable|date',
-        'local_entrevista' => 'nullable|string|max:255',
-        'feedback_recrutador' => 'nullable|string',
-    ]);
+    {
+        $request->validate([
+            'status' => 'required|in:aguardando_retorno,entrevista_agendada,finalizado',
+            'data_entrevista' => 'nullable|date',
+            'local_entrevista' => 'nullable|string|max:255',
+            'feedback_recrutador' => 'nullable|string',
+        ]);
 
-    // Gravação direta sem Mass Assignment
-    $candidatura->status = $request->input('status');
-    $candidatura->data_entrevista = $request->input('data_entrevista');
-    $candidatura->local_entrevista = $request->input('local_entrevista');
-    $candidatura->feedback_recrutador = $request->input('feedback_recrutador');
+        $candidatura->status = $request->input('status');
+        $candidatura->data_entrevista = $request->input('data_entrevista');
+        $candidatura->local_entrevista = $request->input('local_entrevista');
+        $candidatura->feedback_recrutador = $request->input('feedback_recrutador');
 
-    // Force a gravação estrita
-    $candidatura->saveOrFail();
+        $candidatura->saveOrFail();
 
-    return redirect()->back()->with('sucesso', 'Acompanhamento atualizado!');
-}
+        return redirect()->back()->with('sucesso', 'Acompanhamento atualizado!');
+    }
 }
