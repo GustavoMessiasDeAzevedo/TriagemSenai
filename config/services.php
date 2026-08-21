@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    // ADICIONE ESTE BLOCO DO GEMINI:
+    'gemini' => [
+        'key' => env('GEMINI_API_KEY'),
+    ],
+
 ];
