@@ -247,7 +247,7 @@
                     </div>
                 </div>
 
-                <!-- MODAL DE FEEDBACK COM ANALISE IA E LINKS CLICÁVEIS -->
+                <!-- MODAL DE FEEDBACK COM ANALISE IA E RECOMENDAÇÕES/LINKS -->
                 <div id="modalFeedback" class="hidden fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-all">
                     <div class="bg-white rounded-2xl p-6 sm:p-8 max-w-xl w-full shadow-2xl border border-slate-100 space-y-5 max-h-[90vh] overflow-y-auto">
                         
@@ -273,17 +273,24 @@
                             </div>
                         @endif
 
-                        <!-- MENSAGEM DO RECRUTADOR COM LINKS AUTOMATICAMENTE CLICÁVEIS -->
+                        <!-- RECOMENDAÇÕES E RECADO COM DETECÇÃO AUTOMÁTICA DE LINKS -->
                         <div class="space-y-2">
                             <span class="text-xs font-extrabold text-slate-500 uppercase tracking-wider">💬 Recado do Recrutador & Recomendações</span>
                             <div class="p-4 bg-purple-50/70 rounded-xl text-purple-950 text-sm border border-purple-100 leading-relaxed whitespace-pre-line font-medium">
                                 @php
-                                    $textoFeedback = $candidatura->feedback_recrutador ?? 'Nenhum parecer cadastrado até o momento.';
-                                    $textoComLinks = preg_replace(
-                                        '/(https?:\/\/[^\s]+)/',
-                                        '<a href="$1" target="_blank" class="text-purple-700 underline font-bold hover:text-purple-900 transition-colors">$1</a>',
-                                        e($textoFeedback)
-                                    );
+                                    // Utiliza o feedback do recrutador ou o campo de recomendações/links gerado pelo Gemini
+                                    $textoFeedback = $candidatura->feedback_recrutador 
+                                        ?? $candidatura->recomendacoes_links_ia 
+                                        ?? 'Nenhum parecer cadastrado até o momento.';
+
+                                    // Expressão regular que reconhece URLs com ou sem protocolo (http, https, www, domínios .com, .br, etc)
+                                    $pattern = '/\b(?:https?:\/\/|www\.)[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,}(?:\/[^\s<]*)?/i';
+
+                                    $textoComLinks = preg_replace_callback($pattern, function($matches) {
+                                        $url = $matches[0];
+                                        $href = preg_match('/^https?:\/\//i', $url) ? $url : 'https://' . $url;
+                                        return '<a href="' . $href . '" target="_blank" class="text-purple-700 underline font-bold hover:text-purple-900 transition-colors">' . $url . '</a>';
+                                    }, e($textoFeedback));
                                 @endphp
                                 {!! $textoComLinks !!}
                             </div>
