@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\ProcessarAnaliseCurriculo;
 use App\Models\Candidatura;
 use App\Models\Vaga;
 use App\Services\GeminiService;
@@ -21,9 +22,9 @@ class CandidaturaController extends Controller
         return view('candidaturas.index', compact('candidaturas'));
     }
 
-public function store(Request $request, GeminiService $geminiService)
-    {
-        // 1. Trata a string JSON das respostas do questionário
+public function store(Request $request)
+{
+    // 1. Trata a string JSON das respostas do questionário
         if ($request->has('respostas') && is_string($request->input('respostas'))) {
             $request->merge([
                 'respostas_questionario' => json_decode($request->input('respostas'), true) ?? []
@@ -65,53 +66,40 @@ public function store(Request $request, GeminiService $geminiService)
             }
         }
 
-        // 5. Busca Vaga para contextualizar o Gemini
+        // 5. Busca Vaga para contextualizar a IA
         $vagaId = $request->input('vaga_id');
         $vaga = Vaga::find($vagaId);
         $requisitosVaga = $vaga->descricao_requisitos ?? 'Conhecimento em CLP, Automação Industrial, Inversores de Frequência, Redes Industriais e Elétrica.';
         
         $contextoAnalise = $requisitosVaga . "\n\n[Resultado do Teste Técnico do Candidato: {$acertos}/6 acertos]";
 
-        // 6. Chamada de Análise da IA Gemini
-        $analiseIa = $geminiService->analisarCurriculo($textoCurriculo, $contextoAnalise);
-
-        // Extração dos dados processados pela IA
-        $nivelSugerido = $analiseIa['nivel_sugerido_ia'] ?? 'tecnico';
-        $notaMatch     = $analiseIa['nota_match'] ?? 70;
-
-        // Parecer exclusivo para o RH / Recrutador
-        $resumoIa = $analiseIa['resumo_ia'] ?? "PARECER TÉCNICO EXCLUSIVO AO RH: O candidato obteve {$acertos}/6 acertos no teste técnico.\n• Pontos Fortes: Base conceitual em eletroeletrônica e formação inicial.\n• Lacunas Técnicas: Necessita aprofundamento prático em programação de CLP e NR-10.\n• Recomendação: Candidato promissor para validação humana.";
-
-        // Mensagem direta e amigável ao Candidato
-        $orientacaoCandidato = $analiseIa['orientacao_candidato'] ?? "Identificamos que você possui uma boa base conceitual! Para fortalecer seu perfil técnico e avançar na carreira, recomendamos focar no aprimoramento de CLP, comandos elétricos e certificações regulamentares.";
-
-        // Trata os links dinâmicos filtrados pelo Gemini (2 a 4 cursos e portais completos)
-        $linksCursos  = $analiseIa['recomendacoes_links']['cursos'] ?? "• Cursos SENAI SP: https://www.sp.senai.br/cursos\n• NR-10 (Segurança Elétrica): https://www.sp.senai.br/curso/nr-10-seguranca-em-instalacoes-e-servicos-com-eletricidade/75949";
-        $linksPortais = $analiseIa['recomendacoes_links']['portais_curriculo'] ?? "• LinkedIn: https://www.linkedin.com\n• Vagas.com: https://www.vagas.com.br\n• Catho: https://www.catho.com.br";
-
-        // Define a Área de Interesse com base na Vaga vinculada
+        // Define a Área de Interesse
         $areaDirecionada = $vaga->titulo ?? $vaga->area ?? 'Automação Industrial / Eletroeletrônica';
 
-        // 7. Salva a Candidatura no Banco de Dados
-        Candidatura::create([
+        // 6. Salva a Candidatura IMEDIATAMENTE no banco (com status de Análise Pendente/Processando)
+        $candidatura = Candidatura::create([
             'user_id'                => Auth::id(),
             'vaga_id'                => $vagaId,
             'area_interesse'         => $areaDirecionada,
             'caminho_pdf'            => $caminhoPdf,
             'texto_extraido'         => $textoCurriculo,
             'respostas_questionario' => $respostas,
-            'nota_match'             => $notaMatch,
-            'nivel_sugerido_ia'      => $nivelSugerido,
-            'resumo_ia'              => $resumoIa,
+            'nota_match'             => null, // Será preenchido pela Fila
+            'nivel_sugerido_ia'      => 'processando',
+            'resumo_ia'              => "PARECER TÉCNICO EXCLUSIVO AO RH: O candidato obteve {$acertos}/6 acertos no teste técnico. A IA está analisando o currículo...",
             'trilha_links'           => json_encode([
-                'orientacao' => $orientacaoCandidato,
-                'cursos'     => $linksCursos,
-                'portais'    => $linksPortais,
+                'orientacao' => 'Sua candidatura foi recebida e a análise detalhada por IA está em andamento. Atualize a página em instantes.',
+                'cursos'     => '',
+                'portais'    => ''
             ]),
-            'status'                 => 'aguardando_retorno',
+            'status'                 => 'em_analise', // Status para o frontend saber que está rodando
         ]);
 
+        // 7. Dispara a Fila em Segundo Plano (Background)
+        ProcessarAnaliseCurriculo::dispatch($candidatura, $textoCurriculo, $contextoAnalise);
+
+        // 8. Redirecionamento INSTANTÂNEO (mata a tela preta e o duplo envio por F5)
         return redirect()->route('candidaturas.index')
-            ->with('sucesso', 'Sua candidatura e teste técnico foram enviados com sucesso! Acompanhe o status do processo abaixo.');
+            ->with('sucesso', 'Sua candidatura e teste técnico foram enviados! A IA está processando a análise em segundo plano.');
     }
 }
