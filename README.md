@@ -1,4 +1,4 @@
-# 🚀 Triagem SENAI — Sistema Inteligente de Seleção e Avaliação de Candidaturas
+#Triagem SENAI — Sistema Inteligente de Seleção e Avaliação de Candidaturas
 
 > **Projeto desenvolvido exclusivamente para a dinâmica de recrutamento e seleção do curso Técnico em Administração do SENAI.**
 
@@ -21,25 +21,16 @@ O sistema combina **testes de conhecimentos técnicos** com análise preditiva d
 
 ## 🔄 Fluxo Completo de Funcionamento
 
-O funcionamento do sistema segue uma jornada automatizada dividida entre o candidato e o recrutador:
-[ CANDIDATO ]                                      [ SISTEMA / IA ]                                 [ RECRUTADOR / RH ]
-│                                                   │                                                │
-├─► 1. Preenche Teste Técnico & Envia Currículo     │                                                │
-│   (PDF) no Portal                                 │                                                │
-│                                                   ├─► 2. Salva candidatura (< 1s) e                  │
-│                                                   │   dispara Job na Fila                          │
-│                                                   │                                                │
-│                                                   ├─► 3. Worker executa em 2º Plano:              │
-│                                                   │   • Extrai texto do PDF                        │
-│                                                   │   • Envia dados ao Gemini                      │
-│                                                   │   • Calcula Nota de Match (0-100%)              │
-│                                                   │   • Classifica nível (Básico/Técnico/Avançado) │
-│                                                   │   • Gera Parecer Técnico                       │
-│                                                   │                                                │
-├─► 5. Recebe Resultado, Nota & Trilha ◄────────────┼───────────────────────────────────────────────┼─► 4. Acessa Painel de Gestão
-│   de Estudos Recomendada                          │                                                │   • Revisa parecer da IA
-│                                                   │                                                │   • Agenda Entrevista (Data/Local)
-
+```mermaid
+graph TD
+    A[👨‍🎓 Candidato: Preenche Teste Técnico e envia PDF] -->|Menos de 1s| B[(🛢️ Banco MySQL: Salva Inscrição)]
+    B --> C[📬 Dispara Job na Fila]
+    C --> D[⚙️ Laravel Worker: Processa em 2º Plano]
+    D -->|Extrai PDF + Prompts| E[🤖 Google Gemini API]
+    E -->|Gera Match % e Parecer| F[(💾 Atualiza Banco de Dados)]
+    F --> G[💼 RH: Visualiza Match e Agenda Entrevista]
+    F --> H[🎓 Candidato: Recebe Feedback e Trilha de Estudos]
+```
 
 1. **Inscrição & Teste do Aluno:** O candidato responde ao questionário de conhecimentos técnicos direcionado à vaga e realiza o upload do currículo em PDF.
 2. **Processamento Assíncrono:** O sistema registra a candidatura no banco de dados instantaneamente e delega o processamento da IA para uma fila em segundo plano.
