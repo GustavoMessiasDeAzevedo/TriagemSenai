@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Jobs\ProcessarAnaliseCurriculo;
 use App\Models\Candidatura;
 use App\Models\Vaga;
-use App\Services\GeminiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -22,12 +21,12 @@ class CandidaturaController extends Controller
         return view('candidaturas.index', compact('candidaturas'));
     }
 
-public function store(Request $request)
-{
-    // 1. Trata a string JSON das respostas do questionário
+    public function store(Request $request)
+    {
+        // 1. Trata a string JSON das respostas do questionário
         if ($request->has('respostas') && is_string($request->input('respostas'))) {
             $request->merge([
-                'respostas_questionario' => json_decode($request->input('respostas'), true) ?? []
+                'respostas_questionario' => json_decode($request->input('respostas'), true) ?? [],
             ]);
         }
 
@@ -43,16 +42,16 @@ public function store(Request $request)
 
         if ($request->hasFile('curriculo')) {
             $caminhoPdf = $request->file('curriculo')->store('curriculos', 'public');
-            $caminhoAbsoluto = storage_path('app/public/' . $caminhoPdf);
+            $caminhoAbsoluto = storage_path('app/public/'.$caminhoPdf);
 
             try {
                 if (file_exists($caminhoAbsoluto)) {
-                    $parser = new Parser();
+                    $parser = new Parser;
                     $pdf = $parser->parseFile($caminhoAbsoluto);
                     $textoCurriculo = $pdf->getText();
                 }
             } catch (\Exception $e) {
-                Log::error('Erro ao ler PDF: ' . $e->getMessage());
+                Log::error('Erro ao ler PDF: '.$e->getMessage());
             }
         }
 
@@ -70,29 +69,29 @@ public function store(Request $request)
         $vagaId = $request->input('vaga_id');
         $vaga = Vaga::find($vagaId);
         $requisitosVaga = $vaga->descricao_requisitos ?? 'Conhecimento em CLP, Automação Industrial, Inversores de Frequência, Redes Industriais e Elétrica.';
-        
-        $contextoAnalise = $requisitosVaga . "\n\n[Resultado do Teste Técnico do Candidato: {$acertos}/6 acertos]";
+
+        $contextoAnalise = $requisitosVaga."\n\n[Resultado do Teste Técnico do Candidato: {$acertos}/6 acertos]";
 
         // Define a Área de Interesse
         $areaDirecionada = $vaga->titulo ?? $vaga->area ?? 'Automação Industrial / Eletroeletrônica';
 
         // 6. Salva a Candidatura IMEDIATAMENTE no banco (com status de Análise Pendente/Processando)
         $candidatura = Candidatura::create([
-            'user_id'                => Auth::id(),
-            'vaga_id'                => $vagaId,
-            'area_interesse'         => $areaDirecionada,
-            'caminho_pdf'            => $caminhoPdf,
-            'texto_extraido'         => $textoCurriculo,
+            'user_id' => Auth::id(),
+            'vaga_id' => $vagaId,
+            'area_interesse' => $areaDirecionada,
+            'caminho_pdf' => $caminhoPdf,
+            'texto_extraido' => $textoCurriculo,
             'respostas_questionario' => $respostas,
-            'nota_match'             => null, // Será preenchido pela Fila
-            'nivel_sugerido_ia'      => 'processando',
-            'resumo_ia'              => "PARECER TÉCNICO EXCLUSIVO AO RH: O candidato obteve {$acertos}/6 acertos no teste técnico. A IA está analisando o currículo...",
-            'trilha_links'           => json_encode([
+            'nota_match' => 0, // Será preenchido pela Fila
+            'nivel_sugerido_ia' => 'basico',
+            'resumo_ia' => "PARECER TÉCNICO EXCLUSIVO AO RH: O candidato obteve {$acertos}/6 acertos no teste técnico. A IA está analisando o currículo...",
+            'trilha_links' => json_encode([
                 'orientacao' => 'Sua candidatura foi recebida e a análise detalhada por IA está em andamento. Atualize a página em instantes.',
-                'cursos'     => '',
-                'portais'    => ''
+                'cursos' => '',
+                'portais' => '',
             ]),
-            'status'                 => 'em_analise', // Status para o frontend saber que está rodando
+            'status' => 'em_analise', // Status para o frontend saber que está rodando
         ]);
 
         // 7. Dispara a Fila em Segundo Plano (Background)
