@@ -91,7 +91,7 @@ class CandidaturaController extends Controller
                 'cursos' => '',
                 'portais' => '',
             ]),
-            'status' => 'em_analise', // Status para o frontend saber que está rodando
+            'status' => 'aguardando_retorno', // Status para o frontend saber que está rodando
         ]);
 
         // 7. Dispara a Fila em Segundo Plano (Background)
