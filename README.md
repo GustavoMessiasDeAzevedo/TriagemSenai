@@ -1,4 +1,4 @@
-#Triagem SENAI — Sistema Inteligente de Seleção e Avaliação de Candidaturas
+#  Triagem SENAI — Sistema Inteligente de Seleção e Avaliação de Candidaturas
 
 > **Projeto desenvolvido exclusivamente para a dinâmica de recrutamento e seleção do curso Técnico em Administração do SENAI.**
 
