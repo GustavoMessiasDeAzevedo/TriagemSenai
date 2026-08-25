@@ -1,59 +1,161 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Triagem SENAI — Sistema Inteligente de Seleção e Avaliação de Candidaturas
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+> **Projeto desenvolvido exclusivamente para a dinâmica de recrutamento e seleção do curso Técnico em Administração do SENAI.**
 
-## About Laravel
+[![Laravel](https://img.shields.io/badge/Laravel-12.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)](https://laravel.com)
+[![PHP](https://img.shields.io/badge/PHP-8.2+-777BB4?style=for-the-badge&logo=php&logoColor=white)](https://php.net)
+[![Google Gemini API](https://img.shields.io/badge/Google_Gemini-IA-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev/)
+[![MySQL](https://img.shields.io/badge/MySQL-8.0+-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](https://www.mysql.com)
+[![Railway](https://img.shields.io/badge/Deploy-Railway-0B0D0E?style=for-the-badge&logo=railway&logoColor=white)](https://railway.app)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.x-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 📌 Sobre o Projeto
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+O **Triagem SENAI** é uma solução web *full-stack* desenvolvida especialmente para **otimizar e simular a dinâmica de recrutamento e seleção do curso Técnico em Administração do SENAI**.
 
-## Learning Laravel
+O sistema combina **testes de conhecimentos técnicos** com análise preditiva de currículos via **Inteligência Artificial (Google Gemini)**, permitindo que a equipe de RH analise candidatos com agilidade, imparcialidade e riqueza de dados.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+---
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## 🔄 Fluxo Completo de Funcionamento
 
-## Laravel Sponsors
+```mermaid
+graph TD
+    A[Candidato: Preenche Teste Tecnico e envia PDF] -->|Menos de 1s| B[(Banco MySQL: Salva Inscricao)]
+    B --> C[Dispara Job na Fila]
+    C --> D[Laravel Worker: Processa em 2 Plano]
+    D -->|Extrai PDF + Prompts| E[Google Gemini API]
+    E -->|Gera Match % e Parecer| F[(Atualiza Banco de Dados)]
+    F --> G[RH: Visualiza Match e Agenda Entrevista]
+    F --> H[Candidato: Recebe Feedback e Trilha de Estudos]
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+1. **Inscrição & Teste do Aluno:** O candidato responde ao questionário de conhecimentos técnicos direcionado à vaga e realiza o upload do currículo em PDF.
+2. **Processamento Assíncrono:** O sistema registra a candidatura no banco de dados instantaneamente e delega o processamento da IA para uma fila em segundo plano.
+3. **Análise com Gemini IA:** O worker lê o PDF do currículo, cruza as informações com o desempenho no teste técnico e gera um diagnóstico preditivo.
+4. **Painel do Recrutador:** O RH visualiza o *Match %*, nível recomendado, parecer da IA e interface para agendamento de entrevistas com data e local.
+5. **Feedback & Trilha de Aprendizagem:** O aluno acompanha o status da candidatura e recebe recomendações automáticas de cursos do SENAI para aprimorar seu perfil.
 
-### Premium Partners
+---
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## ✨ Principais Funcionalidades
 
-## Contributing
+### 👨‍🎓 Para o Candidato
+- **Upload de Currículo (PDF):** Envio rápido de documentos em formato PDF.
+- **Avaliação Técnica Direcionada:** Teste de conhecimentos práticos focado em Administração/Automação.
+- **Match & Diagnóstico em Tempo Real:** Visualização da porcentagem de compatibilidade e nível técnico sugerido.
+- **Trilha de Estudos Inteligente:** Recomendações personalizadas de cursos e portais sugeridos pela IA.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 💼 Para o Recrutador / RH
+- **Dashboard Centralizado:** Filtros por vagas e status das candidaturas.
+- **Parecer Técnico da IA:** Diagnóstico descritivo destacando pontos fortes e lacunas do candidato.
+- **Categorização Automática:** Classificação em `Básico`, `Técnico` ou `Avançado`.
+- **Módulo de Agendamento:** Interface para marcar data, horário e sala/local de entrevistas.
 
-## Code of Conduct
+---
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## 🛠️ Tecnologias Utilizadas
 
-## Security Vulnerabilities
+- **Core & Backend:** PHP 8.2+, Laravel 12.x
+- **Frontend & Interface:** Blade Templates, Tailwind CSS, Alpine.js
+- **Banco de Dados:** MySQL 8.0+
+- **Inteligência Artificial:** Google Gemini API (Gemini Flash / Pro)
+- **Processamento de Documentos:** `smalot/pdfparser`
+- **Filas & Workers:** Laravel Queues (`database` driver)
+- **Hospedagem & Deploy:** Railway (Arquitetura Multi-Serviço: Web + MySQL + Worker)
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+---
 
-## License
+## ⚙️ Instalação e Configuração Local
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### Pré-requisitos
+- PHP >= 8.2
+- Composer
+- Node.js & NPM
+- Servidor MySQL rodando localmente
+
+### Passo a Passo
+
+1. **Clonar o Repositório:**
+   ```bash
+   git clone [https://github.com/GustavoMessiasDeAzevedo/TriagemSenai.git](https://github.com/GustavoMessiasDeAzevedo/TriagemSenai.git)
+   cd TriagemSenai
+   ```
+
+2. **Instalar Dependências PHP e JS:**
+   ```bash
+   composer install
+   npm install && npm run build
+   ```
+
+3. **Configurar as Variáveis de Ambiente:**
+   Copie o arquivo `.env.example` e gere a chave da aplicação:
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
+
+4. **Configurações Essenciais do `.env`:**
+   Abra o arquivo `.env` e configure o banco de dados, a fila e a chave da API do Gemini:
+   ```env
+   APP_NAME="Triagem SENAI"
+   APP_URL=http://localhost:8000
+
+   # Configurações do Banco de Dados
+   DB_CONNECTION=mysql
+   DB_HOST=127.0.0.1
+   DB_PORT=3306
+   DB_DATABASE=triagem_senai
+   DB_USERNAME=root
+   DB_PASSWORD=sua_senha
+
+   # Configuração de Fila (Obrigatório 'database' para processamento em 2º plano)
+   QUEUE_CONNECTION=database
+
+   # Chave de API do Google Gemini (Obrigatória para análise de IA)
+   GEMINI_API_KEY=sua_chave_api_do_google_gemini
+   ```
+
+5. **Executar Migrations e Storage Link:**
+   ```bash
+   php artisan migrate
+   php artisan storage:link
+   ```
+
+6. **Iniciar o Servidor de Desenvolvimento:**
+   Em um terminal:
+   ```bash
+   php artisan serve
+   ```
+
+7. **Iniciar o Worker da Fila (Obrigatório para processar o Gemini):**
+   Em outro terminal:
+   ```bash
+   php artisan queue:work
+   ```
+
+---
+
+## 🚀 Arquitetura de Deploy em Produção (Railway)
+
+O projeto está hospedado no Railway utilizando uma estrutura isolada de 3 serviços para garantir alta disponibilidade e zero travamentos:
+
+* **Serviço 1 — MySQL Database:** Banco relacional em nuvem.
+* **Serviço 2 — Web Application (`TriagemSenai`):** Servidor HTTP que recebe os acessos do público.
+  - *Start Command:*
+    ```bash
+    php artisan storage:link --force && php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=$PORT
+    ```
+* **Serviço 3 — Laravel Worker (`Laravel Worker`):** Container dedicado exclusivamente para consumir a fila de tarefas e chamar a API do Gemini.
+  - *Start Command:*
+    ```bash
+    php artisan queue:work --tries=3 --timeout=120
+    ```
+
+---
+
+## 📄 Licença
+
+Este projeto foi desenvolvido para fins acadêmicos e institucionais na dinâmica do curso **Técnico em Administração do SENAI**.
