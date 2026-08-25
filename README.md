@@ -23,136 +23,139 @@ O sistema combina **testes de conhecimentos técnicos** com análise preditiva d
 
 ```mermaid
 graph TD
-    A[👨‍🎓 Candidato: Preenche Teste Técnico e envia PDF] -->|Menos de 1s| B[(🛢️ Banco MySQL: Salva Inscrição)]
-    B --> C[📬 Dispara Job na Fila]
-    C --> D[⚙️ Laravel Worker: Processa em 2º Plano]
-    D -->|Extrai PDF + Prompts| E[🤖 Google Gemini API]
-    E -->|Gera Match % e Parecer| F[(💾 Atualiza Banco de Dados)]
-    F --> G[💼 RH: Visualiza Match e Agenda Entrevista]
-    F --> H[🎓 Candidato: Recebe Feedback e Trilha de Estudos]
+    A[Candidato: Preenche Teste Tecnico e envia PDF] -->|Menos de 1s| B[(Banco MySQL: Salva Inscricao)]
+    B --> C[Dispara Job na Fila]
+    C --> D[Laravel Worker: Processa em 2 Plano]
+    D -->|Extrai PDF + Prompts| E[Google Gemini API]
+    E -->|Gera Match % e Parecer| F[(Atualiza Banco de Dados)]
+    F --> G[RH: Visualiza Match e Agenda Entrevista]
+    F --> H[Candidato: Recebe Feedback e Trilha de Estudos]
+```
 
-Inscrição & Teste do Aluno: O candidato responde ao questionário de conhecimentos técnicos direcionado à vaga e realiza o upload do currículo em PDF.
+1. **Inscrição & Teste do Aluno:** O candidato responde ao questionário de conhecimentos técnicos direcionado à vaga e realiza o upload do currículo em PDF.
+2. **Processamento Assíncrono:** O sistema registra a candidatura no banco de dados instantaneamente e delega o processamento da IA para uma fila em segundo plano.
+3. **Análise com Gemini IA:** O worker lê o PDF do currículo, cruza as informações com o desempenho no teste técnico e gera um diagnóstico preditivo.
+4. **Painel do Recrutador:** O RH visualiza o *Match %*, nível recomendado, parecer da IA e interface para agendamento de entrevistas com data e local.
+5. **Feedback & Trilha de Aprendizagem:** O aluno acompanha o status da candidatura e recebe recomendações automáticas de cursos do SENAI para aprimorar seu perfil.
 
-Processamento Assíncrono: O sistema registra a candidatura no banco de dados instantaneamente e delega o processamento da IA para uma fila em segundo plano.
+---
 
-Análise com Gemini IA: O worker lê o PDF do currículo, cruza as informações com o desempenho no teste técnico e gera um diagnóstico preditivo.
+## ✨ Principais Funcionalidades
 
-Painel do Recrutador: O RH visualiza o Match %, nível recomendado, parecer da IA e interface para agendamento de entrevistas com data e local.
+### 👨‍🎓 Para o Candidato
+- **Upload de Currículo (PDF):** Envio rápido de documentos em formato PDF.
+- **Avaliação Técnica Direcionada:** Teste de conhecimentos práticos focado em Administração/Automação.
+- **Match & Diagnóstico em Tempo Real:** Visualização da porcentagem de compatibilidade e nível técnico sugerido.
+- **Trilha de Estudos Inteligente:** Recomendações personalizadas de cursos e portais sugeridos pela IA.
 
-Feedback & Trilha de Aprendizagem: O aluno acompanha o status da candidatura e recebe recomendações automáticas de cursos do SENAI para aprimorar seu perfil.
+### 💼 Para o Recrutador / RH
+- **Dashboard Centralizado:** Filtros por vagas e status das candidaturas.
+- **Parecer Técnico da IA:** Diagnóstico descritivo destacando pontos fortes e lacunas do candidato.
+- **Categorização Automática:** Classificação em `Básico`, `Técnico` ou `Avançado`.
+- **Módulo de Agendamento:** Interface para marcar data, horário e sala/local de entrevistas.
 
-✨ Principais Funcionalidades
-👨‍🎓 Para o Candidato
-Upload de Currículo (PDF): Envio rápido de documentos em formato PDF.
+---
 
-Avaliação Técnica Direcionada: Teste de conhecimentos práticos focado em Administração/Automação.
+## 🛠️ Tecnologias Utilizadas
 
-Match & Diagnóstico em Tempo Real: Visualização da porcentagem de compatibilidade e nível técnico sugerido.
+- **Core & Backend:** PHP 8.2+, Laravel 12.x
+- **Frontend & Interface:** Blade Templates, Tailwind CSS, Alpine.js
+- **Banco de Dados:** MySQL 8.0+
+- **Inteligência Artificial:** Google Gemini API (Gemini Flash / Pro)
+- **Processamento de Documentos:** `smalot/pdfparser`
+- **Filas & Workers:** Laravel Queues (`database` driver)
+- **Hospedagem & Deploy:** Railway (Arquitetura Multi-Serviço: Web + MySQL + Worker)
 
-Trilha de Estudos Inteligente: Recomendações personalizadas de cursos e portais sugeridos pela IA.
+---
 
-💼 Para o Recrutador / RH
-Dashboard Centralizado: Filtros por vagas e status das candidaturas.
+## ⚙️ Instalação e Configuração Local
 
-Parecer Técnico da IA: Diagnóstico descritivo destacando pontos fortes e lacunas do candidato.
+### Pré-requisitos
+- PHP >= 8.2
+- Composer
+- Node.js & NPM
+- Servidor MySQL rodando localmente
 
-Categorização Automática: Classificação em Básico, Técnico ou Avançado.
+### Passo a Passo
 
-Módulo de Agendamento: Interface para marcar data, horário e sala/local de entrevistas.
+1. **Clonar o Repositório:**
+   ```bash
+   git clone [https://github.com/GustavoMessiasDeAzevedo/TriagemSenai.git](https://github.com/GustavoMessiasDeAzevedo/TriagemSenai.git)
+   cd TriagemSenai
+   ```
 
-🛠️ Tecnologias Utilizadas
-Core & Backend: PHP 8.2+, Laravel 12.x
+2. **Instalar Dependências PHP e JS:**
+   ```bash
+   composer install
+   npm install && npm run build
+   ```
 
-Frontend & Interface: Blade Templates, Tailwind CSS, Alpine.js
+3. **Configurar as Variáveis de Ambiente:**
+   Copie o arquivo `.env.example` e gere a chave da aplicação:
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
 
-Banco de Dados: MySQL 8.0+
+4. **Configurações Essenciais do `.env`:**
+   Abra o arquivo `.env` e configure o banco de dados, a fila e a chave da API do Gemini:
+   ```env
+   APP_NAME="Triagem SENAI"
+   APP_URL=http://localhost:8000
 
-Inteligência Artificial: Google Gemini API (Gemini Flash / Pro)
+   # Configurações do Banco de Dados
+   DB_CONNECTION=mysql
+   DB_HOST=127.0.0.1
+   DB_PORT=3306
+   DB_DATABASE=triagem_senai
+   DB_USERNAME=root
+   DB_PASSWORD=sua_senha
 
-Processamento de Documentos: smalot/pdfparser
+   # Configuração de Fila (Obrigatório 'database' para processamento em 2º plano)
+   QUEUE_CONNECTION=database
 
-Filas & Workers: Laravel Queues (database driver)
+   # Chave de API do Google Gemini (Obrigatória para análise de IA)
+   GEMINI_API_KEY=sua_chave_api_do_google_gemini
+   ```
 
-Hospedagem & Deploy: Railway (Arquitetura Multi-Serviço: Web + MySQL + Worker)
+5. **Executar Migrations e Storage Link:**
+   ```bash
+   php artisan migrate
+   php artisan storage:link
+   ```
 
-⚙️ Instalação e Configuração Local
-Pré-requisitos
-PHP >= 8.2
+6. **Iniciar o Servidor de Desenvolvimento:**
+   Em um terminal:
+   ```bash
+   php artisan serve
+   ```
 
-Composer
+7. **Iniciar o Worker da Fila (Obrigatório para processar o Gemini):**
+   Em outro terminal:
+   ```bash
+   php artisan queue:work
+   ```
 
-Node.js & NPM
+---
 
-Servidor MySQL rodando localmente
+## 🚀 Arquitetura de Deploy em Produção (Railway)
 
-Passo a Passo
-Clonar o Repositório:
-
-Bash
-git clone [https://github.com/GustavoMessiasDeAzevedo/TriagemSenai.git](https://github.com/GustavoMessiasDeAzevedo/TriagemSenai.git)
-cd TriagemSenai
-Instalar Dependências PHP e JS:
-
-Bash
-composer install
-npm install && npm run build
-Configurar as Variáveis de Ambiente:
-Copie o arquivo .env.example e gere a chave da aplicação:
-
-Bash
-cp .env.example .env
-php artisan key:generate
-Configurações Essenciais do .env:
-Abra o arquivo .env e configure o banco de dados, a fila e a chave da API do Gemini:
-
-Snippet de código
-APP_NAME="Triagem SENAI"
-APP_URL=http://localhost:8000
-
-# Configurações do Banco de Dados
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=triagem_senai
-DB_USERNAME=root
-DB_PASSWORD=sua_senha
-
-# Configuração de Fila (Obrigatório 'database' para processamento em 2º plano)
-QUEUE_CONNECTION=database
-
-# Chave de API do Google Gemini (Obrigatória para análise de IA)
-GEMINI_API_KEY=sua_chave_api_do_google_gemini
-Executar Migrations e Storage Link:
-
-Bash
-php artisan migrate
-php artisan storage:link
-Iniciar o Servidor de Desenvolvimento:
-Em um terminal:
-
-Bash
-php artisan serve
-Iniciar o Worker da Fila (Obrigatório para processar o Gemini):
-Em outro terminal:
-
-Bash
-php artisan queue:work
-🚀 Arquitetura de Deploy em Produção (Railway)
 O projeto está hospedado no Railway utilizando uma estrutura isolada de 3 serviços para garantir alta disponibilidade e zero travamentos:
 
-Serviço 1 — MySQL Database: Banco relacional em nuvem.
+* **Serviço 1 — MySQL Database:** Banco relacional em nuvem.
+* **Serviço 2 — Web Application (`TriagemSenai`):** Servidor HTTP que recebe os acessos do público.
+  - *Start Command:*
+    ```bash
+    php artisan storage:link --force && php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=$PORT
+    ```
+* **Serviço 3 — Laravel Worker (`Laravel Worker`):** Container dedicado exclusivamente para consumir a fila de tarefas e chamar a API do Gemini.
+  - *Start Command:*
+    ```bash
+    php artisan queue:work --tries=3 --timeout=120
+    ```
 
-Serviço 2 — Web Application (TriagemSenai): Servidor HTTP que recebe os acessos do público.
+---
 
-Start Command:
+## 📄 Licença
 
-Bash
-php artisan storage:link --force && php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=$PORT
-Serviço 3 — Laravel Worker (Laravel Worker): Container dedicado exclusivamente para consumir a fila de tarefas e chamar a API do Gemini.
-
-Start Command:
-
-Bash
-php artisan queue:work --tries=3 --timeout=120
-📄 Licença
-Este projeto foi desenvolvido para fins acadêmicos e institucionais na dinâmica do curso Técnico em Administração do SENAI.
+Este projeto foi desenvolvido para fins acadêmicos e institucionais na dinâmica do curso **Técnico em Administração do SENAI**.
