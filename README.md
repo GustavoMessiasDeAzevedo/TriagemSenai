@@ -1,4 +1,4 @@
-#  Triagem SENAI — Sistema Inteligente de Seleção e Avaliação de Candidaturas
+# Triagem SENAI — Sistema Inteligente de Seleção e Avaliação de Candidaturas
 
 > **Projeto desenvolvido exclusivamente para a dinâmica de recrutamento e seleção do curso Técnico em Administração do SENAI.**
 
@@ -30,58 +30,67 @@ graph TD
     E -->|Gera Match % e Parecer| F[(💾 Atualiza Banco de Dados)]
     F --> G[💼 RH: Visualiza Match e Agenda Entrevista]
     F --> H[🎓 Candidato: Recebe Feedback e Trilha de Estudos]
-```
 
-1. **Inscrição & Teste do Aluno:** O candidato responde ao questionário de conhecimentos técnicos direcionado à vaga e realiza o upload do currículo em PDF.
-2. **Processamento Assíncrono:** O sistema registra a candidatura no banco de dados instantaneamente e delega o processamento da IA para uma fila em segundo plano.
-3. **Análise com Gemini IA:** O worker lê o PDF do currículo, cruza as informações com o desempenho no teste técnico e gera um diagnóstico preditivo.
-4. **Painel do Recrutador:** O RH visualiza o *Match %*, nível recomendado, parecer da IA e interface para agendamento de entrevistas com data e local.
-5. **Feedback & Trilha de Aprendizagem:** O aluno acompanha o status da candidatura e recebe recomendações automáticas de cursos do SENAI para aprimorar seu perfil.
+Inscrição & Teste do Aluno: O candidato responde ao questionário de conhecimentos técnicos direcionado à vaga e realiza o upload do currículo em PDF.
 
----
+Processamento Assíncrono: O sistema registra a candidatura no banco de dados instantaneamente e delega o processamento da IA para uma fila em segundo plano.
 
-## ✨ Principais Funcionalidades
+Análise com Gemini IA: O worker lê o PDF do currículo, cruza as informações com o desempenho no teste técnico e gera um diagnóstico preditivo.
 
-### 👨‍🎓 Para o Candidato
-- **Upload de Currículo (PDF):** Envio rápido de documentos em formato PDF.
-- **Avaliação Técnica Direcionada:** Teste de conhecimentos práticos focado em Administração/Automação.
-- **Match & Diagnóstico em Tempo Real:** Visualização da porcentagem de compatibilidade e nível técnico sugerido.
-- **Trilha de Estudos Inteligente:** Recomendações personalizadas de cursos e portais sugeridos pela IA.
+Painel do Recrutador: O RH visualiza o Match %, nível recomendado, parecer da IA e interface para agendamento de entrevistas com data e local.
 
-### 💼 Para o Recrutador / RH
-- **Dashboard Centralizado:** Filtros por vagas e status das candidaturas.
-- **Parecer Técnico da IA:** Diagnóstico descritivo destacando pontos fortes e lacunas do candidato.
-- **Categorização Automática:** Classificação em `Básico`, `Técnico` ou `Avançado`.
-- **Módulo de Agendamento:** Interface para marcar data, horário e sala/local de entrevistas.
+Feedback & Trilha de Aprendizagem: O aluno acompanha o status da candidatura e recebe recomendações automáticas de cursos do SENAI para aprimorar seu perfil.
 
----
+✨ Principais Funcionalidades
+👨‍🎓 Para o Candidato
+Upload de Currículo (PDF): Envio rápido de documentos em formato PDF.
 
-## 🛠️ Tecnologias Utilizadas
+Avaliação Técnica Direcionada: Teste de conhecimentos práticos focado em Administração/Automação.
 
-- **Core & Backend:** PHP 8.2+, Laravel 12.x
-- **Frontend & Interface:** Blade Templates, Tailwind CSS, Alpine.js
-- **Banco de Dados:** MySQL 8.0+
-- **Inteligência Artificial:** Google Gemini API (Gemini Flash / Pro)
-- **Processamento de Documentos:** `smalot/pdfparser`
-- **Filas & Workers:** Laravel Queues (`database` driver)
-- **Hospedagem & Deploy:** Railway (Arquitetura Multi-Serviço: Web + MySQL + Worker)
+Match & Diagnóstico em Tempo Real: Visualização da porcentagem de compatibilidade e nível técnico sugerido.
 
----
+Trilha de Estudos Inteligente: Recomendações personalizadas de cursos e portais sugeridos pela IA.
 
-## ⚙️ Instalação e Configuração Local
+💼 Para o Recrutador / RH
+Dashboard Centralizado: Filtros por vagas e status das candidaturas.
 
-### Pré-requisitos
-- PHP >= 8.2
-- Composer
-- Node.js & NPM
-- Servidor MySQL rodando localmente
+Parecer Técnico da IA: Diagnóstico descritivo destacando pontos fortes e lacunas do candidato.
 
-### Passo a Passo
+Categorização Automática: Classificação em Básico, Técnico ou Avançado.
 
-1. **Clonar o Repositório:**
-   ```bash
-   git clone [https://github.com/GustavoMessiasDeAzevedo/TriagemSenai.git](https://github.com/GustavoMessiasDeAzevedo/TriagemSenai.git)
-   cd TriagemSenai
+Módulo de Agendamento: Interface para marcar data, horário e sala/local de entrevistas.
+
+🛠️ Tecnologias Utilizadas
+Core & Backend: PHP 8.2+, Laravel 12.x
+
+Frontend & Interface: Blade Templates, Tailwind CSS, Alpine.js
+
+Banco de Dados: MySQL 8.0+
+
+Inteligência Artificial: Google Gemini API (Gemini Flash / Pro)
+
+Processamento de Documentos: smalot/pdfparser
+
+Filas & Workers: Laravel Queues (database driver)
+
+Hospedagem & Deploy: Railway (Arquitetura Multi-Serviço: Web + MySQL + Worker)
+
+⚙️ Instalação e Configuração Local
+Pré-requisitos
+PHP >= 8.2
+
+Composer
+
+Node.js & NPM
+
+Servidor MySQL rodando localmente
+
+Passo a Passo
+Clonar o Repositório:
+
+Bash
+git clone [https://github.com/GustavoMessiasDeAzevedo/TriagemSenai.git](https://github.com/GustavoMessiasDeAzevedo/TriagemSenai.git)
+cd TriagemSenai
 Instalar Dependências PHP e JS:
 
 Bash
