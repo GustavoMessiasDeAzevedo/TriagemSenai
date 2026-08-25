@@ -99,6 +99,6 @@ class CandidaturaController extends Controller
 
         // 8. Redirecionamento INSTANTÂNEO (mata a tela preta e o duplo envio por F5)
         return redirect()->route('candidaturas.index')
-            ->with('sucesso', 'Sua candidatura e teste técnico foram enviados! A IA está processando a análise em segundo plano.');
+            ->with('sucesso', 'Seu currículo e teste técnico foram enviados! Estamos processando as informações.');
     }
 }
