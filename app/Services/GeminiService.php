@@ -86,7 +86,7 @@ class GeminiService
                 \"nivel_sugerido_ia\": \"basico | tecnico | avancado\",
                 \"nota_match\": 85,
                 \"resumo_ia\": \"PARECER TÉCNICO EXCLUSIVO AO RH: Descreva o desempenho real, pontos fortes e erros com base nas respostas enviadas.\",
-                \"orientacao_candidato\": \"FEEDBACK HUMANIZADO PARA O CANDIDATO: Escreva uma mensagem motivadora alinhada ao perfil dele.\",
+                \"orientacao_candidato\": \"FEEDBACK DO SISTEMA: Escreva uma mensagem motivadora alinhada ao perfil dele.\",
                 \"recomendacoes_links\": {
                     \"cursos\": \"SELECIONE APENAS DE 2 A 4 LINKS do BANCO DE CURSOS DISPONÍVEIS no formato: • Nome do Curso: URL\",
                     \"portais_curriculo\": \"Mantenha os portais no formato: • Nome do Portal: URL\"
