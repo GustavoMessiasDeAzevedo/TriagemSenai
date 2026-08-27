@@ -17,7 +17,7 @@ class GeminiService
         $this->apiKey = config('services.gemini.key') ?? env('GEMINI_API_KEY');
 
         // Endpoint atualizado com o modelo estável gemini-3.6-flash
-        $this->baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+        $this->baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
     }
 
     public function analisarCurriculo(string $textoCurriculo, string $contextoAnalise): array
