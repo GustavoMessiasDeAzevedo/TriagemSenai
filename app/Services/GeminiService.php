@@ -85,8 +85,8 @@ class GeminiService
                 {
                 \"nivel_sugerido_ia\": \"basico | tecnico | avancado\",
                 \"nota_match\": 85,
-                \"resumo_ia\": \"PARECER TÉCNICO EXCLUSIVO AO RH: Descreva o desempenho real, pontos fortes e erros com base nas respostas enviadas.\",
-                \"orientacao_candidato\": \"FEEDBACK DO SISTEMA: Escreva uma mensagem motivadora alinhada ao perfil dele.\",
+                \"resumo_ia\": \"Descreva o desempenho real, pontos fortes e erros com base nas respostas enviadas.\",
+                \"orientacao_candidato\": \"Escreva uma mensagem motivadora alinhada ao perfil dele.\",
                 \"recomendacoes_links\": {
                     \"cursos\": \"SELECIONE APENAS DE 2 A 4 LINKS do BANCO DE CURSOS DISPONÍVEIS no formato: • Nome do Curso: URL\",
                     \"portais_curriculo\": \"Mantenha os portais no formato: • Nome do Portal: URL\"
@@ -120,6 +120,8 @@ class GeminiService
                 $data = json_decode($cleanJson, true);
 
                 if (json_last_error() === JSON_ERROR_NONE && isset($data['resumo_ia'])) {
+                    $data['resumo_ia'] = preg_replace('/^PARECER TÉCNICO EXCLUSIVO AO RH:\s*/i', '', $data['resumo_ia']);
+                    $data['orientacao_candidato'] = preg_replace('/^(FEEDBACK HUMANIZADO PARA O CANDIDATO|FEEDBACK DO SISTEMA):\s*/i', '', $data['orientacao_candidato']);
                     return $data;
                 }
             }
