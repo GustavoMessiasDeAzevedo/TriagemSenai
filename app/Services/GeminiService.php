@@ -17,13 +17,13 @@ class GeminiService
         $this->apiKey = config('services.gemini.key') ?? env('GEMINI_API_KEY');
 
         // Endpoint atualizado com o modelo estável gemini-3.6-flash
-        $this->baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent';
+        $this->baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
     }
 
     public function analisarCurriculo(string $textoCurriculo, string $contextoAnalise): array
     {
         // Aumenta o tempo limite de execução do PHP para evitar a queda aos 30 segundos
-        set_time_limit(90);
+        set_time_limit(150);
 
         // Se a chave não for encontrada no servidor, registra no log e aciona fallback
         if (empty($this->apiKey)) {
