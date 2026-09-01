@@ -1,0 +1,13 @@
+{
+  "providers": ["php", "node"],
+  "phases": {
+    "setup": {
+      "nixPkgs": [
+        "php82",
+        "php82Extensions.pcntl",
+        "php82Extensions.pdo_mysql",
+        "nodejs"
+      ]
+    }
+  }
+}
