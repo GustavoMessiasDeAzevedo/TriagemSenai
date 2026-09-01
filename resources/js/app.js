@@ -1,5 +1,5 @@
 import "./bootstrap";
-import "./realtime-candidaturas";
+import "./realtime-candidaturas.js";
 
 import Alpine from "alpinejs";
 
