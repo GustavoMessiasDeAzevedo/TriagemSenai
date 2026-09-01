@@ -14,11 +14,15 @@
          x-data="{ 
             modalAberto: false, 
             candidaturaSelecionada: null,
-            abrirModal(item) {
-                this.candidaturaSelecionada = item;
-                this.modalAberto = true;
+            candidaturas: {{ $candidaturas->toJson() }},
+            carregarECandidato(id) {
+                this.candidaturaSelecionada = this.candidaturas.find(c => c.id === id);
+                if (this.candidaturaSelecionada) {
+                    this.modalAberto = true;
+                }
             }
-         }">
+         }"
+         @abrir-modal.window="carregarECandidato($event.detail)">
         
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
@@ -125,7 +129,7 @@
                                         @endif
             
                                         <button type="button" 
-                                                @click='abrirModal({{ $item->toJson() }})'
+                                                @click="$dispatch('abrir-modal', {{ $item->id }})"
                                                 class="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg text-xs transition-colors shadow-sm">
                                             Avaliar / Agendar
                                         </button>
@@ -137,7 +141,6 @@
                                         Nenhuma candidatura encontrada com os filtros aplicados.
                                     </td>
                                 </tr>
-                            @empty
                             @endforelse
                         </tbody>
                     </table>
