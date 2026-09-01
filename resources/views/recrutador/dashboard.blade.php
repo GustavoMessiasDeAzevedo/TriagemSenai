@@ -10,7 +10,16 @@
         </h2>
     </x-slot>
 
-    <div class="py-12" x-data="{ modalAberto: false, candidaturaSelecionada: null }">
+    <div class="py-12" 
+         x-data="{ 
+            modalAberto: false, 
+            candidaturaSelecionada: null,
+            abrirModal(item) {
+                this.candidaturaSelecionada = item;
+                this.modalAberto = true;
+            }
+         }">
+        
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
             <!-- MENSAGEM DE SUCESSO -->
@@ -26,14 +35,13 @@
             <!-- FILTROS DE PESQUISA -->
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                 <form method="GET" action="{{ route('dashboard') }}" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                    
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Nível Sugerido IA</label>
                         <select name="nivel" class="w-full rounded-xl border-gray-300 text-sm focus:ring-purple-500 focus:border-purple-500">
                             <option value="">Todos os Níveis</option>
                             <option value="avancado" {{ request('nivel') == 'avancado' ? 'selected' : '' }}>Avançado (80%+)</option>
                             <option value="tecnico" {{ request('nivel') == 'tecnico' ? 'selected' : '' }}>Técnico (50% a 79%)</option>
-                            <option value="basico" {{ request('nivel') == 'basico' ? 'selected' : '' }}>Básico (< 50%)</option>
+                            <option value="basico" {{ request('nivel') == 'basico' ? 'selected' : '' }}>Básico (&lt; 50%)</option>
                         </select>
                     </div>
 
@@ -57,7 +65,6 @@
                             Limpar
                         </a>
                     </div>
-
                 </form>
             </div>
 
@@ -83,7 +90,7 @@
                                         <span class="block text-xs font-normal text-gray-400">{{ $item->user->email ?? '' }}</span>
                                     </td>
 
-                                    <td class="py-4 px-6 text-gray-600 max-w-xs truncate" title="{{ $vagas->firstWhere('nivel', $item->nivel_sugerido_ia)->titulo ?? $item->area_interesse ?? '' }}">
+                                    <td class="py-4 px-6 text-gray-600 max-w-xs truncate">
                                         @php
                                             $vagaCorrespondente = $vagas->firstWhere('nivel', $item->nivel_sugerido_ia);
                                         @endphp
@@ -118,7 +125,7 @@
                                         @endif
 
                                         <button type="button" 
-                                                @click="modalAberto = true; candidaturaSelecionada = {{ json_encode($item) }}" 
+                                                @click="abrirModal({{ $item->toJson() }})" 
                                                 class="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg text-xs transition-colors shadow-sm">
                                             Avaliar / Agendar
                                         </button>
@@ -164,61 +171,60 @@
                     </div>
 
                     <!-- FORMULÁRIO DE ATUALIZAÇÃO -->
-                    <form :action="`/dashboard/candidaturas/${candidaturaSelecionada?.id}`" method="POST" class="space-y-4">
-                        @csrf
-                        @method('PUT')
+                    <template x-if="candidaturaSelecionada">
+                        <form :action="`/dashboard/candidaturas/${candidaturaSelecionada.id}`" method="POST" class="space-y-4">
+                            @csrf
+                            @method('PUT')
 
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Status da Candidatura</label>
-                                <select name="status" x-model="candidaturaSelecionada.status" class="w-full rounded-xl border-gray-300 text-sm focus:ring-purple-500">
-                                    <option value="aguardando_retorno">Aguardando Retorno (Em Análise)</option>
-                                    <option value="entrevista_agendada">Entrevista Agendada</option>
-                                    <option value="finalizado">Processo Finalizado</option>
-                                </select>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Status da Candidatura</label>
+                                    <select name="status" x-model="candidaturaSelecionada.status" class="w-full rounded-xl border-gray-300 text-sm focus:ring-purple-500">
+                                        <option value="aguardando_retorno">Aguardando Retorno (Em Análise)</option>
+                                        <option value="entrevista_agendada">Entrevista Agendada</option>
+                                        <option value="finalizado">Processo Finalizado</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Data/Hora da Entrevista</label>
+                                    <input type="datetime-local" 
+                                           name="data_entrevista" 
+                                           x-model="candidaturaSelecionada.data_entrevista" 
+                                           class="w-full rounded-xl border-gray-300 text-sm focus:ring-purple-500">
+                                </div>
                             </div>
 
                             <div>
-                                <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Data/Hora da Entrevista</label>
-                                <input type="datetime-local" 
-                                       name="data_entrevista" 
-                                       x-model="candidaturaSelecionada.data_entrevista" 
-                                       :value="candidaturaSelecionada?.data_entrevista" 
-                                       class="w-full rounded-xl border-gray-300 text-sm focus:ring-purple-500">
+                                <label for="local_entrevista_input" class="block text-xs font-bold text-gray-700 uppercase mb-2">Local / Sala da Entrevista</label>
+                                <input type="text" 
+                                    id="local_entrevista_input" 
+                                    name="local_entrevista" 
+                                    x-model="candidaturaSelecionada.local_entrevista" 
+                                    placeholder="Ex: Sala de Reuniões 02 / Presencial no Bloco 01" 
+                                    class="w-full rounded-xl border-gray-300 text-sm focus:ring-purple-500">
                             </div>
-                        </div>
 
-                        <div>
-                            <label for="local_entrevista_input" class="block text-xs font-bold text-gray-700 uppercase mb-2">Local / Sala da Entrevista</label>
-                            <input type="text" 
-                                id="local_entrevista_input" 
-                                name="local_entrevista" 
-                                x-model="candidaturaSelecionada.local_entrevista" 
-                                :value="candidaturaSelecionada?.local_entrevista" 
-                                placeholder="Ex: Sala de Reuniões 02 / Presencial no Bloco 01" 
-                                class="w-full rounded-xl border-gray-300 text-sm focus:ring-purple-500">
-                        </div>
+                            <div>
+                                <label for="feedback_recrutador_input" class="block text-xs font-bold text-gray-700 uppercase mb-2">Feedback / Recado Visível para o Aluno</label>
+                                <textarea id="feedback_recrutador_input" 
+                                        name="feedback_recrutador" 
+                                        rows="3" 
+                                        x-model="candidaturaSelecionada.feedback_recrutador" 
+                                        placeholder="Escreva uma mensagem ou parecer conclusivo que o aluno verá no modal de feedback..." 
+                                        class="w-full rounded-xl border-gray-300 text-sm focus:ring-purple-500"></textarea>
+                            </div>
 
-                        <div>
-                            <label for="feedback_recrutador_input" class="block text-xs font-bold text-gray-700 uppercase mb-2">Feedback / Recado Visível para o Aluno</label>
-                            <textarea id="feedback_recrutador_input" 
-                                    name="feedback_recrutador" 
-                                    rows="3" 
-                                    x-model="candidaturaSelecionada.feedback_recrutador" 
-                                    :value="candidaturaSelecionada?.feedback_recrutador" 
-                                    placeholder="Escreva uma mensagem ou parecer conclusivo que o aluno verá no modal de feedback..." 
-                                    class="w-full rounded-xl border-gray-300 text-sm focus:ring-purple-500"></textarea>
-                        </div>
-
-                        <div class="flex items-center justify-end gap-3 pt-4 border-t">
-                            <button type="button" @click="modalAberto = false" class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl text-sm transition-colors">
-                                Cancelar
-                            </button>
-                            <button type="submit" class="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-sm transition-colors shadow-sm flex items-center gap-2">
-                                <span>Salvar e Enviar para o Aluno</span> 💾
-                            </button>
-                        </div>
-                    </form>
+                            <div class="flex items-center justify-end gap-3 pt-4 border-t">
+                                <button type="button" @click="modalAberto = false" class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl text-sm transition-colors">
+                                    Cancelar
+                                </button>
+                                <button type="submit" class="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-sm transition-colors shadow-sm flex items-center gap-2">
+                                    <span>Salvar e Enviar para o Aluno</span> 💾
+                                </button>
+                            </div>
+                        </form>
+                    </template>
 
                 </div>
             </div>
