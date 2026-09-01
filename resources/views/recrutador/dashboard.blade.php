@@ -10,7 +10,16 @@
         </h2>
     </x-slot>
 
-    <div class="py-12" x-data="{ modalAberto: false, candidaturaSelecionada: null }">
+    <div class="py-12" 
+         x-data="{ 
+            modalAberto: false, 
+            candidaturaSelecionada: null,
+            abrirModal(item) {
+                this.candidaturaSelecionada = item;
+                this.modalAberto = true;
+            }
+         }">
+        
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
             <!-- MENSAGEM DE SUCESSO -->
@@ -115,19 +124,11 @@
                                             </a>
                                         @endif
             
-                                    <button type="button" 
-                                            @click="modalAberto = true; candidaturaSelecionada = {
-                                                id: {{ $item->id }},
-                                                status: '{{ $item->status }}',
-                                                data_entrevista: '{{ $item->data_entrevista }}',
-                                                local_entrevista: '{{ $item->local_entrevista ?? '' }}',
-                                                feedback_recrutador: '{{ $item->feedback_recrutador ?? '' }}',
-                                                resumo_ia: '{{ e($item->resumo_ia ?? '') }}',
-                                                user: { name: '{{ e($item->user->name ?? '') }}' }
-                                            }"
-                                            class="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg text-xs transition-colors shadow-sm">
-                                        Avaliar / Agendar
-                                    </button>
+                                        <button type="button" 
+                                                @click='abrirModal({{ $item->toJson() }})'
+                                                class="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg text-xs transition-colors shadow-sm">
+                                            Avaliar / Agendar
+                                        </button>
                                     </td>
                                 </tr>
                             @empty
@@ -136,6 +137,7 @@
                                         Nenhuma candidatura encontrada com os filtros aplicados.
                                     </td>
                                 </tr>
+                            @empty
                             @endforelse
                         </tbody>
                     </table>
