@@ -1,13 +1,17 @@
 {
-  "providers": ["php", "node"],
-  "phases": {
-    "setup": {
-      "nixPkgs": [
-        "php82",
-        "php82Extensions.pcntl",
-        "php82Extensions.pdo_mysql",
-        "nodejs"
-      ]
+    "providers": ["php", "node"],
+    "phases": {
+        "setup": {
+            "nixPkgs": [
+                "php82",
+                "php82Extensions.pcntl",
+                "php82Extensions.pdo_mysql",
+                "php82Extensions.mbstring",
+                "nodejs"
+            ]
+        }
+    },
+    "variables": {
+        "NIXPACKS_PHP_FALLBACK_PATH": "/nix/store"
     }
-  }
 }
