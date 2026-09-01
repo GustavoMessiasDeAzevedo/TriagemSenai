@@ -23,7 +23,7 @@ class DashboardController extends Controller
             $query->where('area_interesse', $request->area);
         }
 
-        $candidaturas = $query->orderBy('nota_match', 'desc')->paginate(10);
+        $candidaturas = $query->orderBy('nota_match', 'desc')->paginate(60);
         $vagas = Vaga::all();
 
         return view('recrutador.dashboard', compact('candidaturas', 'vagas'));

@@ -16,7 +16,7 @@ class ProcessarAnaliseCurriculo implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     // Permite que a IA demore até 2 minutos processando sem estourar o tempo
-    public $timeout = 120;
+    public $timeout = 180;
 
     /**
      * Declaração explícita do tipo para o editor de código reconhecer o Eloquent
@@ -54,6 +54,8 @@ class ProcessarAnaliseCurriculo implements ShouldQueue
                 ]),
                 'status'            => 'aguardando_retorno', // Status finalizado
             ]);
+
+            event(new AnaliseCurriculo($this->candidatura->id));
         } catch (\Throwable $e) {
             Log::error("Erro na Fila Gemini (Candidatura #{$this->candidatura->id}): " . $e->getMessage());
             $this->candidatura->update([

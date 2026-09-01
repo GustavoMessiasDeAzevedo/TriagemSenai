@@ -1,6 +1,7 @@
-import './bootstrap';
+import "./bootstrap";
+import "./realtime-candidaturas";
 
-import Alpine from 'alpinejs';
+import Alpine from "alpinejs";
 
 window.Alpine = Alpine;
 
