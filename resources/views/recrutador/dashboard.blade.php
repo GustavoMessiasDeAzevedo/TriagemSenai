@@ -115,11 +115,19 @@
                                             </a>
                                         @endif
             
-                                        <button type="button" 
-                                                @click="candidaturaSelecionada = {{ json_encode($item) }}; modalAberto = true"
-                                                class="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg text-xs transition-colors shadow-sm">
-                                            Avaliar / Agendar
-                                        </button>
+                                    <button type="button" 
+                                            @click="modalAberto = true; candidaturaSelecionada = {
+                                                id: {{ $item->id }},
+                                                status: '{{ $item->status }}',
+                                                data_entrevista: '{{ $item->data_entrevista }}',
+                                                local_entrevista: '{{ $item->local_entrevista ?? '' }}',
+                                                feedback_recrutador: '{{ $item->feedback_recrutador ?? '' }}',
+                                                resumo_ia: '{{ e($item->resumo_ia ?? '') }}',
+                                                user: { name: '{{ e($item->user->name ?? '') }}' }
+                                            }"
+                                            class="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg text-xs transition-colors shadow-sm">
+                                        Avaliar / Agendar
+                                    </button>
                                     </td>
                                 </tr>
                             @empty
