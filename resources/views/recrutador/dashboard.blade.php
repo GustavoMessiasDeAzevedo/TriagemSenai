@@ -10,20 +10,7 @@
         </h2>
     </x-slot>
 
-    <div class="py-12" 
-         x-data="{ 
-            modalAberto: false, 
-            candidaturaSelecionada: null,
-            candidaturas: {{ $candidaturas->toJson() }},
-            carregarECandidato(id) {
-                this.candidaturaSelecionada = this.candidaturas.find(c => c.id === id);
-                if (this.candidaturaSelecionada) {
-                    this.modalAberto = true;
-                }
-            }
-         }"
-         @abrir-modal.window="carregarECandidato($event.detail)">
-        
+    <div class="py-12" x-data="{ modalAberto: false, candidaturaSelecionada: null }">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
             <!-- MENSAGEM DE SUCESSO -->
@@ -39,13 +26,14 @@
             <!-- FILTROS DE PESQUISA -->
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                 <form method="GET" action="{{ route('dashboard') }}" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                    
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Nível Sugerido IA</label>
                         <select name="nivel" class="w-full rounded-xl border-gray-300 text-sm focus:ring-purple-500 focus:border-purple-500">
                             <option value="">Todos os Níveis</option>
                             <option value="avancado" {{ request('nivel') == 'avancado' ? 'selected' : '' }}>Avançado (80%+)</option>
                             <option value="tecnico" {{ request('nivel') == 'tecnico' ? 'selected' : '' }}>Técnico (50% a 79%)</option>
-                            <option value="basico" {{ request('nivel') == 'basico' ? 'selected' : '' }}>Básico (&lt; 50%)</option>
+                            <option value="basico" {{ request('nivel') == 'basico' ? 'selected' : '' }}>Básico (< 50%)</option>
                         </select>
                     </div>
 
@@ -69,6 +57,7 @@
                             Limpar
                         </a>
                     </div>
+
                 </form>
             </div>
 
@@ -93,24 +82,24 @@
                                         {{ $item->user->name ?? 'Usuário Removido' }}
                                         <span class="block text-xs font-normal text-gray-400">{{ $item->user->email ?? '' }}</span>
                                     </td>
-            
+
                                     <td class="py-4 px-6 text-gray-600 max-w-xs truncate" title="{{ $vagas->firstWhere('nivel', $item->nivel_sugerido_ia)->titulo ?? $item->area_interesse ?? '' }}">
                                         @php
                                             $vagaCorrespondente = $vagas->firstWhere('nivel', $item->nivel_sugerido_ia);
                                         @endphp
                                         {{ $vagaCorrespondente->titulo ?? $item->area_interesse ?? 'Vaga Não Definida' }}
                                     </td>
-            
+
                                     <td class="py-4 px-6 whitespace-nowrap">
                                         <span class="px-2.5 py-1 rounded-full text-xs font-bold {{ $item->nota_match >= 80 ? 'bg-green-100 text-green-700' : ($item->nota_match >= 50 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700') }}">
                                             {{ $item->nota_match }}% Match
                                         </span>
                                     </td>
-            
+
                                     <td class="py-4 px-6 capitalize text-gray-700 font-medium whitespace-nowrap">
                                         {{ $item->nivel_sugerido_ia ?? 'Não avaliado' }}
                                     </td>
-            
+
                                     <td class="py-4 px-6 whitespace-nowrap">
                                         @if ($item->status == 'aguardando_retorno')
                                             <span class="px-2.5 py-1 bg-amber-100 text-amber-700 text-xs font-bold rounded-full">Análise Pendente</span>
@@ -120,16 +109,16 @@
                                             <span class="px-2.5 py-1 bg-purple-100 text-purple-700 text-xs font-bold rounded-full">Finalizado</span>
                                         @endif
                                     </td>
-            
+
                                     <td class="py-4 px-6 text-right space-x-2 whitespace-nowrap">
                                         @if($item->caminho_pdf)
                                             <a href="{{ asset('storage/' . $item->caminho_pdf) }}" target="_blank" class="inline-flex items-center text-xs font-bold text-gray-500 hover:text-gray-700">
                                                 📄 PDF
                                             </a>
                                         @endif
-            
+
                                         <button type="button" 
-                                                @click="$dispatch('abrir-modal', {{ $item->id }})"
+                                                @click="modalAberto = true; candidaturaSelecionada = {{ json_encode($item) }}" 
                                                 class="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg text-xs transition-colors shadow-sm">
                                             Avaliar / Agendar
                                         </button>
@@ -148,13 +137,12 @@
             </div>
 
             <!-- MODAL DE ANÁLISE -->
-            <div x-show="modalAberto"
+            <div x-show="modalAberto" 
                  x-cloak
                  style="display: none;"
                  class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
 
-                <div @click.away="modalAberto = false"
-                     class="bg-white rounded-2xl p-6 max-w-2xl w-full shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
+                <div @click.away="modalAberto = false" class="bg-white rounded-2xl p-6 max-w-2xl w-full shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
 
                     <!-- CABEÇALHO DO MODAL -->
                     <div class="flex items-center justify-between border-b pb-4">
@@ -176,60 +164,61 @@
                     </div>
 
                     <!-- FORMULÁRIO DE ATUALIZAÇÃO -->
-                    <template x-if="candidaturaSelecionada">
-                        <form :action="`/dashboard/candidaturas/${candidaturaSelecionada.id}`" method="POST" class="space-y-4">
-                            @csrf
-                            @method('PUT')
+                    <form :action="`/dashboard/candidaturas/${candidaturaSelecionada?.id}`" method="POST" class="space-y-4">
+                        @csrf
+                        @method('PUT')
 
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Status da Candidatura</label>
-                                    <select name="status" x-model="candidaturaSelecionada.status" class="w-full rounded-xl border-gray-300 text-sm focus:ring-purple-500">
-                                        <option value="aguardando_retorno">Aguardando Retorno (Em Análise)</option>
-                                        <option value="entrevista_agendada">Entrevista Agendada</option>
-                                        <option value="finalizado">Processo Finalizado</option>
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Data/Hora da Entrevista</label>
-                                    <input type="datetime-local"
-                                           name="data_entrevista"
-                                           x-model="candidaturaSelecionada.data_entrevista"
-                                           class="w-full rounded-xl border-gray-300 text-sm focus:ring-purple-500">
-                                </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Status da Candidatura</label>
+                                <select name="status" x-model="candidaturaSelecionada.status" class="w-full rounded-xl border-gray-300 text-sm focus:ring-purple-500">
+                                    <option value="aguardando_retorno">Aguardando Retorno (Em Análise)</option>
+                                    <option value="entrevista_agendada">Entrevista Agendada</option>
+                                    <option value="finalizado">Processo Finalizado</option>
+                                </select>
                             </div>
 
                             <div>
-                                <label for="local_entrevista_input" class="block text-xs font-bold text-gray-700 uppercase mb-2">Local / Sala da Entrevista</label>
-                                <input type="text"
-                                    id="local_entrevista_input"
-                                    name="local_entrevista"
-                                    x-model="candidaturaSelecionada.local_entrevista"
-                                    placeholder="Ex: Sala de Reuniões 02 / Presencial no Bloco 01"
-                                    class="w-full rounded-xl border-gray-300 text-sm focus:ring-purple-500">
+                                <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Data/Hora da Entrevista</label>
+                                <input type="datetime-local" 
+                                       name="data_entrevista" 
+                                       x-model="candidaturaSelecionada.data_entrevista" 
+                                       :value="candidaturaSelecionada?.data_entrevista" 
+                                       class="w-full rounded-xl border-gray-300 text-sm focus:ring-purple-500">
                             </div>
+                        </div>
 
-                            <div>
-                                <label for="feedback_recrutador_input" class="block text-xs font-bold text-gray-700 uppercase mb-2">Feedback / Recado Visível para o Aluno</label>
-                                <textarea id="feedback_recrutador_input"
-                                        name="feedback_recrutador"
-                                        rows="3"
-                                        x-model="candidaturaSelecionada.feedback_recrutador"
-                                        placeholder="Escreva uma mensagem ou parecer conclusivo que o aluno verá no modal de feedback..."
-                                        class="w-full rounded-xl border-gray-300 text-sm focus:ring-purple-500"></textarea>
-                            </div>
+                        <div>
+                            <label for="local_entrevista_input" class="block text-xs font-bold text-gray-700 uppercase mb-2">Local / Sala da Entrevista</label>
+                            <input type="text" 
+                                id="local_entrevista_input" 
+                                name="local_entrevista" 
+                                x-model="candidaturaSelecionada.local_entrevista" 
+                                :value="candidaturaSelecionada?.local_entrevista" 
+                                placeholder="Ex: Sala de Reuniões 02 / Presencial no Bloco 01" 
+                                class="w-full rounded-xl border-gray-300 text-sm focus:ring-purple-500">
+                        </div>
 
-                            <div class="flex items-center justify-end gap-3 pt-4 border-t">
-                                <button type="button" @click="modalAberto = false" class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl text-sm transition-colors">
-                                    Cancelar
-                                </button>
-                                <button type="submit" class="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-sm transition-colors shadow-sm flex items-center gap-2">
-                                    <span>Salvar e Enviar para o Aluno</span> 💾
-                                </button>
-                            </div>
-                        </form>
-                    </template>
+                        <div>
+                            <label for="feedback_recrutador_input" class="block text-xs font-bold text-gray-700 uppercase mb-2">Feedback / Recado Visível para o Aluno</label>
+                            <textarea id="feedback_recrutador_input" 
+                                    name="feedback_recrutador" 
+                                    rows="3" 
+                                    x-model="candidaturaSelecionada.feedback_recrutador" 
+                                    :value="candidaturaSelecionada?.feedback_recrutador" 
+                                    placeholder="Escreva uma mensagem ou parecer conclusivo que o aluno verá no modal de feedback..." 
+                                    class="w-full rounded-xl border-gray-300 text-sm focus:ring-purple-500"></textarea>
+                        </div>
+
+                        <div class="flex items-center justify-end gap-3 pt-4 border-t">
+                            <button type="button" @click="modalAberto = false" class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl text-sm transition-colors">
+                                Cancelar
+                            </button>
+                            <button type="submit" class="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-sm transition-colors shadow-sm flex items-center gap-2">
+                                <span>Salvar e Enviar para o Aluno</span> 💾
+                            </button>
+                        </div>
+                    </form>
 
                 </div>
             </div>
