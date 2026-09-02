@@ -118,7 +118,7 @@
                                         @endif
 
                                     <button type="button" 
-                                            @click="abrirModal({{ json_encode($item) }})" 
+                                            @click="candidaturaSelecionada = {{ json_encode($item) }}; modalAberto = true" 
                                             class="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg text-xs transition-colors shadow-sm">
                                         Avaliar / Agendar
                                     </button>
