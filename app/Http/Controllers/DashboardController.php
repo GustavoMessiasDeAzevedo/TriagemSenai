@@ -48,6 +48,8 @@ class DashboardController extends Controller
 
         $candidatura->saveOrFail();
 
+        broadcast(new AnaliseCurriculo($candidatura->id));
+
         return redirect()->back()->with('sucesso', 'Acompanhamento atualizado!');
     }
 }
