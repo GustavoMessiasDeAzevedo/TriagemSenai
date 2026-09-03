@@ -9,8 +9,8 @@ window.Pusher = Pusher;
 
 window.Echo = new Echo({
     broadcaster: "reverb",
-    key: import.meta.env.VITE_REVERB_APP_KEY || "epparfu7fxpxgi4dkwuk",
-    wsHost: import.meta.env.VITE_REVERB_HOST || "websocket-production-7a18.up.railway.app",
+    key: "epparfu7fxpxgi4dkwuk",
+    wsHost: "websocket-production-7a18.up.railway.app",
     wsPort: 443,
     wssPort: 443,
     forceTLS: true,
