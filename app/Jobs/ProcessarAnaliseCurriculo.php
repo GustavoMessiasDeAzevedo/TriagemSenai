@@ -59,8 +59,8 @@ class ProcessarAnaliseCurriculo implements ShouldQueue
         } catch (\Throwable $e) {
             Log::error("Erro na Fila Gemini (Candidatura #{$this->candidatura->id}): " . $e->getMessage());
             $this->candidatura->update([
-                'status' => 'erro_analise'
+                'status' => 'aguardando_retorno'
             ]);
         }
     }
-}   
+}
