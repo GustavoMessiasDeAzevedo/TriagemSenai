@@ -1,5 +1,3 @@
-import Echo from "laravel-echo";
-
 document.addEventListener("DOMContentLoaded", () => {
     if (window.Echo && typeof window.Echo.channel === "function") {
         window.Echo.channel("candidaturas").listen(".AnaliseConcluida", (e) => {
