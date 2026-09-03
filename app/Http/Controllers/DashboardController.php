@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Candidatura;
 use App\Models\Vaga;
 use Illuminate\Http\Request;
+use App\Events\AnaliseCurriculo;
 
 class DashboardController extends Controller
 {
