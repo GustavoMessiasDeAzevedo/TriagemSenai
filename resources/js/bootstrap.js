@@ -7,23 +7,19 @@ import Pusher from "pusher-js";
 
 window.Pusher = Pusher;
 
-const reverbKey = import.meta.env.VITE_REVERB_APP_KEY;
+window.Echo = new Echo({
+    broadcaster: "reverb",
+    key: import.meta.env.VITE_REVERB_APP_KEY || "epparfu7fxpxgi4dkwuk",
+    wsHost: import.meta.env.VITE_REVERB_HOST || "websocket-production-7a18.up.railway.app",
+    wsPort: 443,
+    wssPort: 443,
+    forceTLS: true,
+    enabledTransports: ["ws", "wss"],
+});
 
-if (reverbKey) {
-    window.Echo = new Echo({
-        broadcaster: "reverb",
-        key: reverbKey,
-        wsHost: import.meta.env.VITE_REVERB_HOST || "websocket-production-7a18.up.railway.app",
-        wsPort: import.meta.env.VITE_REVERB_PORT ? Number(import.meta.env.VITE_REVERB_PORT) : 443,
-        wssPort: import.meta.env.VITE_REVERB_PORT ? Number(import.meta.env.VITE_REVERB_PORT) : 443,
-        forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? "https") === "https",
-        enabledTransports: ["ws", "wss"],
-    });
-
-    window.Echo.channel("candidaturas").listen(".AnaliseConcluida", (e) => {
-        const path = window.location.pathname;
-        if (path.includes("/recrutador") || path.includes("/candidaturas")) {
-            window.location.reload();
-        }
-    });
-}
+window.Echo.channel("candidaturas").listen(".AnaliseConcluida", (e) => {
+    const path = window.location.pathname;
+    if (path.includes("/recrutador") || path.includes("/candidaturas")) {
+        window.location.reload();
+    }
+});
