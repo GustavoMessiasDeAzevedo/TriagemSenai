@@ -10,6 +10,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use App\Events\AnaliseCurriculo;
 
 class ProcessarAnaliseCurriculo implements ShouldQueue
 {
@@ -54,8 +55,7 @@ class ProcessarAnaliseCurriculo implements ShouldQueue
                 ]),
                 'status'            => 'aguardando_retorno', // Status finalizado
             ]);
-
-            event(new AnaliseCurriculo($this->candidatura->id));
+            broadcast(new AnaliseCurriculo($this->candidatura->id));
         } catch (\Throwable $e) {
             Log::error("Erro na Fila Gemini (Candidatura #{$this->candidatura->id}): " . $e->getMessage());
             $this->candidatura->update([

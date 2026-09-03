@@ -17,7 +17,10 @@ window.Echo = new Echo({
     enabledTransports: ["ws", "wss"],
 });
 
+// Escuta o evento do Reverb e atualiza a página em tempo real
 window.Echo.channel("candidaturas").listen(".AnaliseConcluida", (e) => {
+    console.log("Notificação recebida para a candidatura:", e.candidaturaId);
+
     const path = window.location.pathname;
     if (path.includes("/recrutador") || path.includes("/candidaturas")) {
         window.location.reload();
